@@ -32,7 +32,7 @@
     <ClCompile Include="Injector.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="pestaff.cpp">
+    <ClCompile Include="PEStaff.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

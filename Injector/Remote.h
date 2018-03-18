@@ -26,6 +26,39 @@ void CopyRemoteDataType(HANDLE hProcess, DataType* pValue, DataType* pLocal) {
 }
 
 template <typename DataType>
+void CopyRemoteDataType(HANDLE hProcess, DataType* pValue, DataType* pLocal, DWORD nElements) {
+	SIZE_T bytesToRead = sizeof(DataType) * nElements;
+	SIZE_T bytesRead;
+
+	BOOL res = ReadProcessMemory(hProcess, pValue, pLocal, bytesToRead, &bytesRead);
+	assert(0 != res);
+	assert(bytesRead == bytesToRead);
+	return;
+}
+
+template <>
+void CopyRemoteDataType(HANDLE hProcess, char* pValue, char* pLocal) {
+	char* pFirstChar = pValue;
+	char* pLastChar = pValue;
+
+	for (;;)
+	{
+		char c = ReadRemoteDataType(hProcess, pLastChar++);
+		if (c == 0) break;
+	}
+
+	SIZE_T bytesToRead = pLastChar - pFirstChar;
+	SIZE_T bytesRead;
+
+	pLocal = (LPSTR)malloc(bytesToRead);
+
+	BOOL res = ReadProcessMemory(hProcess, pValue, static_cast<PVOID>(pLocal), bytesToRead, &bytesRead);
+	assert(0 != res);
+	assert(bytesRead == bytesToRead);
+	return;
+}
+
+template <typename DataType>
 void WriteRemoteDataType(HANDLE hProcess, DataType* pValue, DataType value) {
 	SIZE_T bytesToWrite = sizeof(DataType);
 	SIZE_T bytesWritten;
@@ -64,3 +97,5 @@ public:
 
 //used hProcess variable implicitly
 #define REMOTE(TYPE, p) (REMOTE_WRAPPER<TYPE>::RemoteFactory()(hProcess, ((TYPE*)p)))
+
+//TODO REMOTE_RVA_TO_VA
