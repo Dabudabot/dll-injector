@@ -1,5 +1,6 @@
+// remote.cpp : works with remote memory
+//
+
 #include "stdafx.h"
-#include "Remote.h"
-#include <assert.h>
 
 
