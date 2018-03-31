@@ -143,13 +143,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Remote.h" />
+    <ClInclude Include="pestaff.h" />
+    <ClInclude Include="remote.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Injector.cpp" />
-    <ClCompile Include="PEStaff.cpp" />
+    <ClCompile Include="injector.cpp" />
+    <ClCompile Include="pestaff.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

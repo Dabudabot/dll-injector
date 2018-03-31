@@ -7,6 +7,8 @@
 *  just use free() on returned pLocal pointers when you don't need them anymore
 */
 
+#pragma once
+
 //this function is the same as CopyRemoteDataType but receive storage for value in order to reduce amount of mallocs
 template <typename DataType>
 DataType* ReadRemoteDataType(HANDLE hProcess, ULONG_PTR pRemoteValue, DataType* pLocalValue) {
@@ -92,8 +94,7 @@ DataType* CopyRemoteArrayZeroEnded(HANDLE hProcess, ULONG_PTR pRemoteValue, /*ou
 	return pLocalValue;
 }
 
-#define RVA_TO_VA(ptype, base, offset) \
-	((ptype)(((DWORD_PTR)(base)) + (offset)));
+
 
 //used hProcess variable implicitly
 #define REMOTE(TYPE, p) (CopyRemoteDataType<TYPE>(hProcess, (p)))

@@ -21,7 +21,10 @@
     <ClInclude Include="targetver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Remote.h">
+    <ClInclude Include="pestaff.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="remote.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -29,10 +32,10 @@
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Injector.cpp">
+    <ClCompile Include="injector.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="PEStaff.cpp">
+    <ClCompile Include="pestaff.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
