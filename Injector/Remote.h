@@ -1,13 +1,13 @@
 // remote.h : works with remote memory
 //
 
+#pragma once
+
 /*
 * pRemote pointers are expected to be ULONG_PTR to disable their dereference
 * we incorporate malloc into Copy... functions to eliminate the need of smart pointers
 *  just use free() on returned pLocal pointers when you don't need them anymore
 */
-
-#pragma once
 
 //this function is the same as CopyRemoteDataType but receive storage for value in order to reduce amount of mallocs
 template <typename DataType>
@@ -94,13 +94,17 @@ DataType* CopyRemoteArrayZeroEnded(HANDLE hProcess, ULONG_PTR pRemoteValue, /*ou
 	return pLocalValue;
 }
 
-
-
-//used hProcess variable implicitly
+//using hProcess variable implicitly
 #define REMOTE(TYPE, p) (CopyRemoteDataType<TYPE>(hProcess, (p)))
 #define REMOTE_ARRAY_FIXED(TYPE, p, n) (CopyRemoteArrayFixedLength<TYPE>(hProcess, (p), (n)))
 #define REMOTE_ARRAY_ZEROENDED(TYPE, p, n) (CopyRemoteArrayZeroEnded<TYPE>(hProcess, (p), &(n)))
 #define REMOTE_ARRAY_ZEROENDED_NOLEN(TYPE, p) (CopyRemoteArrayZeroEnded<TYPE>(hProcess, (p), nullptr))
 
-#define RVA_TO_REMOTE_VA(ptype, base, offset) \
- ((offset) ? (ULONG_PTR)((ptype)(((DWORD_PTR)(base)) + (offset))) : 0)
+//using pRemoteImageBase variable implicitly
+#define RVA_TO_REMOTE_VA(ptype, offset) \
+ ((offset) ? (ULONG_PTR)(RVA_TO_VA(ptype, pRemoteImageBase, offset)) : 0)
+
+//use this in function prototype
+#define REMOTE_ARGS_DEFS HANDLE hProcess, ULONG_PTR pRemoteImageBase
+//use this in function call
+#define REMOTE_ARGS_CALL hProcess, pRemoteImageBase
