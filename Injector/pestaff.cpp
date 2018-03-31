@@ -7,10 +7,10 @@
 //execute custom callback from worker
 void RemoteModuleWorker(HANDLE hProcess, HMODULE* phModules, DWORD nModules, ModuleCallback worker, PVOID workerContext)
 {
-	for (int i = 0; i < nModules; i++)
+	for (auto i = 0; i < nModules; i++)
 	{
-		auto module = ULONG_PTR(phModules[i]);
-		printf("module %d at %p \n", i, module);
-		worker(hProcess, module, workerContext);
+		const auto module = ULONG_PTR(phModules[i]);
+		printf("module %d at %llu \n", i, module);
+		if (!worker(hProcess, module, workerContext)) break;
 	}
 }
