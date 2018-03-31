@@ -105,6 +105,101 @@ PIMAGE_NT_HEADERS GetLocalPeHeader(REMOTE_ARGS_DEFS, bool* pis64)
 	}
 }
 
+bool FindExport(REMOTE_ARGS_DEFS, PVOID Context)
+{
+	PEXPORT_CONTEXT ExportContext = (PEXPORT_CONTEXT)Context;
+	ExportContext->RemoteFunctionAddress = 0;
+	bool bFound = false; //have I found export in this module?
+	bool bIterateMore = true; //should we iterate next module?
+
+	bool is64;
+	PIMAGE_NT_HEADERS pLocalPeHeader = GetLocalPeHeader(REMOTE_ARGS_CALL, &is64);
+	ULONG_PTR pRemoteImageExportDescriptor;
+
+	if (is64)
+	{
+		PIMAGE_NT_HEADERS64 pLocalPeHeader2 = (PIMAGE_NT_HEADERS64)pLocalPeHeader;
+		pRemoteImageExportDescriptor = RVA_TO_REMOTE_VA(
+			PIMAGE_EXPORT_DIRECTORY,
+			pLocalPeHeader2->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress);
+	}
+	else
+	{
+		PIMAGE_NT_HEADERS32 pLocalPeHeader2 = (PIMAGE_NT_HEADERS32)pLocalPeHeader;
+		pRemoteImageExportDescriptor = RVA_TO_REMOTE_VA(
+			PIMAGE_EXPORT_DIRECTORY,
+			pLocalPeHeader2->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress);
+	}
+	free(pLocalPeHeader);
+
+	PIMAGE_EXPORT_DIRECTORY pLocalImageExportDescriptor =
+		REMOTE(IMAGE_EXPORT_DIRECTORY, pRemoteImageExportDescriptor);
+
+	char* pLocalDllName = nullptr;
+	DWORD* pLocalNames = nullptr;
+	DWORD* pLocalAddrs = nullptr;
+
+	for (;;)
+	{
+		if (!pLocalImageExportDescriptor) break; //no export table, iterate next module
+
+		ULONG_PTR pRemoteDllName = RVA_TO_REMOTE_VA(
+			char*,
+			pLocalImageExportDescriptor->Name);
+		pLocalDllName = REMOTE_ARRAY_ZEROENDED_NOLEN(char, pRemoteDllName);
+
+		printf("dllName is %s \n", pLocalDllName);
+
+		if (0 != strcmp(ExportContext->ModuleName, pLocalDllName)) break; //not our dll, iterate next module
+		bIterateMore = false; //we've found our dll no need to iterate more modules
+
+		ULONG_PTR pRemoteNames =
+			RVA_TO_REMOTE_VA(DWORD*, pLocalImageExportDescriptor->AddressOfNames);
+		ULONG_PTR pRemoteAddrs =
+			RVA_TO_REMOTE_VA(DWORD*, pLocalImageExportDescriptor->AddressOfFunctions);
+
+		pLocalNames = REMOTE_ARRAY_FIXED(DWORD, pRemoteNames, pLocalImageExportDescriptor->NumberOfNames);
+		pLocalAddrs = REMOTE_ARRAY_FIXED(DWORD, pRemoteAddrs, pLocalImageExportDescriptor->NumberOfFunctions);
+
+		if (pLocalImageExportDescriptor->NumberOfNames != pLocalImageExportDescriptor->NumberOfFunctions)
+		{
+			printf("FindExport: ERROR: VERY STRANGE mismatch NumberOfNames vs NumberOfFunctions \n");
+			//TODO printf args ...
+			break;
+		}
+
+		for (int i = 0; i < pLocalImageExportDescriptor->NumberOfNames; i++)
+		{
+			ULONG_PTR pRemoteString = RVA_TO_REMOTE_VA(char*, pLocalNames[i]);
+			char* pLocalString = REMOTE_ARRAY_ZEROENDED_NOLEN(char, pRemoteString);
+
+			//printf("Function: %s at %p \n", pLocalString, pLocalAddrs[i]);
+
+			if (0 == strcmp(ExportContext->FunctionName, pLocalString))
+			{
+				bFound = true; //stop iterating, we found it
+				ExportContext->RemoteFunctionAddress = pRemoteImageBase + pLocalAddrs[i];
+				free(pLocalString);
+				break;
+			}
+			free(pLocalString);
+		}
+
+		break;
+	}
+
+	if ((!bIterateMore)&(!bFound))
+	{
+		printf("FindExport: ERROR: VERY STRANGE function was not found \n");
+	}
+
+	if (pLocalNames) free(pLocalNames);
+	if (pLocalAddrs) free(pLocalAddrs);
+	if (pLocalImageExportDescriptor) free(pLocalImageExportDescriptor);
+	if (pLocalDllName) free(pLocalDllName);
+	return bIterateMore;
+}
+
 //some artifact about working with imports
 #if 0
 if (is64)

@@ -13,3 +13,12 @@ void RemoteModuleWorker(HANDLE hProcess, HMODULE* phModules, DWORD nModules,
 	ModuleCallback Worker, PVOID WorkerContext);
 
 PIMAGE_NT_HEADERS GetLocalPeHeader(REMOTE_ARGS_DEFS, bool* pis64);
+
+typedef struct _EXPORT_CONTEXT
+{
+	char* ModuleName;
+	char* FunctionName;
+	ULONG_PTR RemoteFunctionAddress;
+} EXPORT_CONTEXT, *PEXPORT_CONTEXT;
+
+bool FindExport(REMOTE_ARGS_DEFS, PVOID Context);
