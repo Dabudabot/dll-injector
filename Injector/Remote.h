@@ -11,65 +11,65 @@
 
 //this function is the same as CopyRemoteDataType but receive storage for value in order to reduce amount of mallocs
 template <typename DataType>
-DataType* ReadRemoteDataType(HANDLE hProcess, ULONG_PTR pRemoteValue, DataType* pLocalValue) {
-	SIZE_T bytesToRead = sizeof(DataType);
-	SIZE_T bytesRead;
+DataType* ReadRemoteDataType(const HANDLE hProcess, const ULONG_PTR pRemoteValue, DataType* pLocalValue) {
+	const auto bytes_to_read = sizeof(DataType);
+	SIZE_T bytes_read;
 
 	if (pRemoteValue == 0) return nullptr;
 
-	BOOL res = ReadProcessMemory(hProcess, (PVOID)pRemoteValue, pLocalValue, bytesToRead, &bytesRead);
+	const BOOL res = ReadProcessMemory(hProcess, PVOID(pRemoteValue), pLocalValue, bytes_to_read, &bytes_read);
 	assert(0 != res);
-	assert(bytesRead == bytesToRead);
+	assert(bytes_read == bytes_to_read);
 	return pLocalValue;
 }
 
 template <typename DataType>
-void WriteRemoteDataType(HANDLE hProcess, ULONG_PTR pRemoteValue, DataType* pLocalValue) {
-	SIZE_T bytesToWrite = sizeof(DataType);
-	SIZE_T bytesWritten;
+void WriteRemoteDataType(const HANDLE hProcess, const ULONG_PTR pRemoteValue, DataType* pLocalValue) {
+	const auto bytes_to_write = sizeof(DataType);
+	SIZE_T bytes_written;
 
-	BOOL res = WriteProcessMemory(hProcess, (PVOID)pRemoteValue, pLocalValue, bytesToWrite, &bytesWritten);
-	assert(0 != res);
-	assert(bytesWritten == bytesToWrite);
+	const BOOL res = WriteProcessMemory(hProcess, PVOID(pRemoteValue), pLocalValue, bytes_to_write, &bytes_written);
+	assert(0 != res);	
+	assert(bytes_written == bytes_to_write);
 	return;
 }
 
 template <typename DataType>
-DataType* CopyRemoteDataType(HANDLE hProcess, ULONG_PTR pRemoteValue) {
-	SIZE_T bytesToRead = sizeof(DataType);
-	SIZE_T bytesRead;
+DataType* CopyRemoteDataType(const HANDLE hProcess, const ULONG_PTR pRemoteValue) {
+	const auto bytes_to_read = sizeof(DataType);
+	SIZE_T bytes_read;
 
 	if (pRemoteValue == 0) return nullptr;
 
-	DataType* pLocalValue = (DataType*)malloc(bytesToRead);
-	BOOL res = ReadProcessMemory(hProcess, (PVOID)pRemoteValue, pLocalValue, bytesToRead, &bytesRead);
+	DataType* p_local_value = static_cast<DataType*>(malloc(bytes_to_read));
+	const bool res = ReadProcessMemory(hProcess, PVOID(pRemoteValue), p_local_value, bytes_to_read, &bytes_read);
 	assert(0 != res);
-	assert(bytesRead == bytesToRead);
-	return pLocalValue;
+	assert(bytes_read == bytes_to_read);
+	return p_local_value;
 }
 
 template <typename DataType>
-DataType* CopyRemoteArrayFixedLength(HANDLE hProcess, ULONG_PTR pRemoteValue, DWORD nElements) {
-	SIZE_T bytesToRead = sizeof(DataType)*nElements;
-	SIZE_T bytesRead;
+DataType* CopyRemoteArrayFixedLength(const HANDLE hProcess, const ULONG_PTR pRemoteValue, const DWORD nElements) {
+	auto bytes_to_read = sizeof(DataType)*nElements;
+	SIZE_T bytes_read;
 
 	if (pRemoteValue == 0) return nullptr;
 
-	DataType* pLocalValue = (DataType*)malloc(bytesToRead);
-	BOOL res = ReadProcessMemory(hProcess, (PVOID)pRemoteValue, pLocalValue, bytesToRead, &bytesRead);
+	DataType* p_local_value = static_cast<DataType*>(malloc(bytes_to_read));
+	const bool res = ReadProcessMemory(hProcess, PVOID(pRemoteValue), p_local_value, bytes_to_read, &bytes_read);
 	assert(0 != res);
-	assert(bytesRead == bytesToRead);
-	return pLocalValue;
+	assert(bytes_read == bytes_to_read);
+	return p_local_value;
 }
 
 //reads not more than 1OK of elements (to handle possible errors if bad pointer)
 //nElements counts zeroed element
 template <typename DataType>
-DataType* CopyRemoteArrayZeroEnded(HANDLE hProcess, ULONG_PTR pRemoteValue, /*out opt*/ DWORD* pnElements) {
-	ULONG_PTR pRemoteLastElement = pRemoteValue;
-	DataType ZeroElement;
-	memset(&ZeroElement, 0, sizeof(DataType));
-	DataType CurrElement; //placeholder
+DataType* CopyRemoteArrayZeroEnded(const HANDLE hProcess, const ULONG_PTR pRemoteValue, /*out opt*/ DWORD* pnElements) {
+	auto p_remote_last_element = pRemoteValue;
+	DataType zero_element;
+	memset(&zero_element, 0, sizeof(DataType));
+	DataType curr_element; //placeholder
 
 	if (pRemoteValue == 0)
 	{
@@ -80,31 +80,31 @@ DataType* CopyRemoteArrayZeroEnded(HANDLE hProcess, ULONG_PTR pRemoteValue, /*ou
 	for (;;)
 	{
 		//we use ReadRemoteDataType into &CurrElement to reduce need to malloc/free it
-		DataType* pCurrElement = ReadRemoteDataType<DataType>(hProcess, pRemoteLastElement, &CurrElement);
-		pRemoteLastElement += sizeof(DataType);
-		if (0 == memcmp(pCurrElement, &ZeroElement, sizeof(DataType))) break;
+		DataType* p_curr_element = ReadRemoteDataType<DataType>(hProcess, p_remote_last_element, &curr_element);
+		p_remote_last_element += sizeof(DataType);
+		if (0 == memcmp(p_curr_element, &zero_element, sizeof(DataType))) break;
 	}
 
-	SIZE_T szElements = (pRemoteLastElement - pRemoteValue) / sizeof(DataType);
-	assert(szElements < 10000);
-	DWORD nElements = (DWORD)szElements;
+	const auto sz_elements = (p_remote_last_element - pRemoteValue) / sizeof(DataType);
+	assert(sz_elements < 10000);
+	const DWORD n_elements = DWORD(sz_elements);
 
-	DataType* pLocalValue = CopyRemoteArrayFixedLength<DataType>(hProcess, pRemoteValue, nElements);
-	if (nullptr != pnElements) *pnElements = nElements;
-	return pLocalValue;
+	DataType* p_local_value = CopyRemoteArrayFixedLength<DataType>(hProcess, pRemoteValue, n_elements);
+	if (nullptr != pnElements) *pnElements = n_elements;
+	return p_local_value;
 }
 
 //using hProcess variable implicitly
-#define REMOTE(TYPE, p) (CopyRemoteDataType<TYPE>(hProcess, (p)))
-#define REMOTE_ARRAY_FIXED(TYPE, p, n) (CopyRemoteArrayFixedLength<TYPE>(hProcess, (p), (n)))
-#define REMOTE_ARRAY_ZEROENDED(TYPE, p, n) (CopyRemoteArrayZeroEnded<TYPE>(hProcess, (p), &(n)))
-#define REMOTE_ARRAY_ZEROENDED_NOLEN(TYPE, p) (CopyRemoteArrayZeroEnded<TYPE>(hProcess, (p), nullptr))
+#define REMOTE(TYPE, p) (CopyRemoteDataType<TYPE>(h_process, (p)))
+#define REMOTE_ARRAY_FIXED(TYPE, p, n) (CopyRemoteArrayFixedLength<TYPE>(h_process, (p), (n)))
+#define REMOTE_ARRAY_ZEROENDED(TYPE, p, n) (CopyRemoteArrayZeroEnded<TYPE>(h_process, (p), &(n)))
+#define REMOTE_ARRAY_ZEROENDED_NOLEN(TYPE, p) (CopyRemoteArrayZeroEnded<TYPE>(h_process, (p), nullptr))
 
 //using pRemoteImageBase variable implicitly
-#define RVA_TO_REMOTE_VA(ptype, offset) \
- ((offset) ? (ULONG_PTR)(RVA_TO_VA(ptype, pRemoteImageBase, offset)) : 0)
+#define RVA_TO_REMOTE_VA(p_type, offset) \
+ ((offset) ? (ULONG_PTR)(RVA_TO_VA(p_type, p_remote_image_base, offset)) : 0)
 
 //use this in function prototype
-#define REMOTE_ARGS_DEFS HANDLE hProcess, ULONG_PTR pRemoteImageBase
+#define REMOTE_ARGS_DEFS HANDLE h_process, ULONG_PTR p_remote_image_base
 //use this in function call
-#define REMOTE_ARGS_CALL hProcess, pRemoteImageBase
+#define REMOTE_ARGS_CALL h_process, p_remote_image_base

@@ -143,6 +143,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="injector.h" />
     <ClInclude Include="nativeapi.h" />
     <ClInclude Include="pestaff.h" />
     <ClInclude Include="remote.h" />

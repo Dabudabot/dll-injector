@@ -5,60 +5,59 @@
 
 //do not call this function with  suspended hProcess
 //free() return value
-HMODULE* GetRemoteModules(HANDLE hProcess, DWORD* pnModules)
+HMODULE* GetRemoteModules(const HANDLE hProcess, DWORD* pnModules)
 {
-	DWORD cbNeeded, cb = 1 * sizeof(HMODULE);
-	HMODULE* phModules = nullptr;
+	DWORD cb_needed, cb = 1 * sizeof(HMODULE);
+	HMODULE* ph_modules = nullptr;
 	for (;;)
 	{
-		phModules = (HMODULE*)malloc(cb);
-		BOOL res = EnumProcessModulesEx(
+		ph_modules = static_cast<HMODULE*>(malloc(cb));
+		const auto res = EnumProcessModulesEx(
 			hProcess,
-			phModules,
+			ph_modules,
 			cb,
-			&cbNeeded,
+			&cb_needed,
 			LIST_MODULES_ALL);
 		if (res == 0)
 		{
 			printf("EnumProcessModulesEx returns %d, cbNeeded is %d \n",
-				GetLastError(), cbNeeded);
-			free(phModules);
+				GetLastError(), cb_needed);
+			free(ph_modules);
 			return nullptr;
 		}
 
-		if (cb == cbNeeded)
+		if (cb == cb_needed)
 		{
-			printf("Success, cbNeeded is %d \n", cbNeeded);
+			printf("Success, cbNeeded is %d \n", cb_needed);
 			break;
 		}
 
-		free(phModules);
-		cb = cbNeeded;
+		free(ph_modules);
+		cb = cb_needed;
 		continue;
 	}
 
 	*pnModules = cb / sizeof(HMODULE);
-	return phModules;
+	return ph_modules;
 }
 
 //execute custom callback for each worker
-void RemoteModuleWorker(HANDLE hProcess, HMODULE* phModules, DWORD nModules,
-	ModuleCallback Worker, PVOID WorkerContext)
+void RemoteModuleWorker(const HANDLE hProcess, HMODULE* phModules, const DWORD nModules,
+                        const module_callback worker, const PVOID workerContext)
 {
 	for (int i = 0; i < nModules; i++)
 	{
 		ULONG_PTR module = (ULONG_PTR)(phModules[i]); \
 			printf("module %d at %p \n", i, module);
-		if (!Worker(hProcess, module, WorkerContext)) break;
+		if (!worker(hProcess, module, workerContext)) break;
 	}
 }
 
 PIMAGE_NT_HEADERS GetLocalPeHeader(REMOTE_ARGS_DEFS, bool* pis64)
 {
-	PIMAGE_DOS_HEADER pLocalDosHeader = REMOTE(IMAGE_DOS_HEADER, pRemoteImageBase);
-	ULONG_PTR pRemotePeHeader =
-		RVA_TO_REMOTE_VA(PIMAGE_NT_HEADERS, pLocalDosHeader->e_lfanew);
-	PIMAGE_NT_HEADERS pLocalPeHeader = REMOTE(IMAGE_NT_HEADERS, pRemotePeHeader);
+	const auto p_local_dos_header = REMOTE(IMAGE_DOS_HEADER, p_remote_image_base);
+	const auto p_remote_pe_header = RVA_TO_REMOTE_VA(PIMAGE_NT_HEADERS, p_local_dos_header->e_lfanew);
+	const auto p_local_pe_header = REMOTE(IMAGE_NT_HEADERS, p_remote_pe_header);
 
 #if 0
 	//check PE signature
@@ -77,127 +76,127 @@ PIMAGE_NT_HEADERS GetLocalPeHeader(REMOTE_ARGS_DEFS, bool* pis64)
 	printf("PeHeader starts with %s (strlen=%d) \n", sig42, n);
 #endif
 
-	switch (pLocalPeHeader->FileHeader.Machine)
+	switch (p_local_pe_header->FileHeader.Machine)
 	{
 	case IMAGE_FILE_MACHINE_I386:
 		assert(sizeof(IMAGE_OPTIONAL_HEADER32) ==
-			pLocalPeHeader->FileHeader.SizeOfOptionalHeader);
+			p_local_pe_header->FileHeader.SizeOfOptionalHeader);
 		{
 			*pis64 = false;
-			PIMAGE_NT_HEADERS32 pLocalPeHeader2 = REMOTE(IMAGE_NT_HEADERS32, pRemotePeHeader);
-			free(pLocalPeHeader);
-			return (PIMAGE_NT_HEADERS)pLocalPeHeader2;
+			const auto p_local_pe_header2 = REMOTE(IMAGE_NT_HEADERS32, p_remote_pe_header);
+			free(p_local_pe_header);
+			return PIMAGE_NT_HEADERS(p_local_pe_header2);
 		}
 	case IMAGE_FILE_MACHINE_AMD64:
 		assert(sizeof(IMAGE_OPTIONAL_HEADER64) ==
-			pLocalPeHeader->FileHeader.SizeOfOptionalHeader);
+			p_local_pe_header->FileHeader.SizeOfOptionalHeader);
 		{
 			*pis64 = true;
-			PIMAGE_NT_HEADERS64 pLocalPeHeader2 = REMOTE(IMAGE_NT_HEADERS64, pRemotePeHeader);
-			free(pLocalPeHeader);
-			return (PIMAGE_NT_HEADERS)pLocalPeHeader2;
+			const auto p_local_pe_header2 = REMOTE(IMAGE_NT_HEADERS64, p_remote_pe_header);
+			free(p_local_pe_header);
+			return PIMAGE_NT_HEADERS(p_local_pe_header2);
 		}
 	default:
 		printf("Unsupported hardware platfrom, Machine is %d",
-			pLocalPeHeader->FileHeader.Machine);
-		free(pLocalPeHeader);
+			p_local_pe_header->FileHeader.Machine);
+		free(p_local_pe_header);
 		return nullptr;
 	}
 }
 
-bool FindExport(REMOTE_ARGS_DEFS, PVOID Context)
+bool FindExport(REMOTE_ARGS_DEFS, const PVOID context)
 {
-	PEXPORT_CONTEXT ExportContext = (PEXPORT_CONTEXT)Context;
-	ExportContext->RemoteFunctionAddress = 0;
-	bool bFound = false; //have I found export in this module?
-	bool bIterateMore = true; //should we iterate next module?
+	const auto export_context = pexport_context(context);
+	export_context->remote_function_address = 0;
+	auto b_found = false; //have I found export in this module?
+	auto b_iterate_more = true; //should we iterate next module?
 
 	bool is64;
-	PIMAGE_NT_HEADERS pLocalPeHeader = GetLocalPeHeader(REMOTE_ARGS_CALL, &is64);
-	ULONG_PTR pRemoteImageExportDescriptor;
+	const auto p_local_pe_header = GetLocalPeHeader(REMOTE_ARGS_CALL, &is64);
+	ULONG_PTR p_remote_image_export_descriptor;
 
 	if (is64)
 	{
-		PIMAGE_NT_HEADERS64 pLocalPeHeader2 = (PIMAGE_NT_HEADERS64)pLocalPeHeader;
-		pRemoteImageExportDescriptor = RVA_TO_REMOTE_VA(
+		const auto p_local_pe_header2 = PIMAGE_NT_HEADERS64(p_local_pe_header);
+		p_remote_image_export_descriptor = RVA_TO_REMOTE_VA(
 			PIMAGE_EXPORT_DIRECTORY,
-			pLocalPeHeader2->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress);
+			p_local_pe_header2->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress);
 	}
 	else
 	{
-		PIMAGE_NT_HEADERS32 pLocalPeHeader2 = (PIMAGE_NT_HEADERS32)pLocalPeHeader;
-		pRemoteImageExportDescriptor = RVA_TO_REMOTE_VA(
+		const auto p_local_pe_header2 = PIMAGE_NT_HEADERS32(p_local_pe_header);
+		p_remote_image_export_descriptor = RVA_TO_REMOTE_VA(
 			PIMAGE_EXPORT_DIRECTORY,
-			pLocalPeHeader2->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress);
+			p_local_pe_header2->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress);
 	}
-	free(pLocalPeHeader);
+	free(p_local_pe_header);
 
-	PIMAGE_EXPORT_DIRECTORY pLocalImageExportDescriptor =
-		REMOTE(IMAGE_EXPORT_DIRECTORY, pRemoteImageExportDescriptor);
+	const auto p_local_image_export_descriptor =
+		REMOTE(IMAGE_EXPORT_DIRECTORY, p_remote_image_export_descriptor);
 
-	char* pLocalDllName = nullptr;
-	DWORD* pLocalNames = nullptr;
-	DWORD* pLocalAddrs = nullptr;
+	char* p_local_dll_name = nullptr;
+	DWORD* p_local_names = nullptr;
+	DWORD* p_local_addrs = nullptr;
 
 	for (;;)
 	{
-		if (!pLocalImageExportDescriptor) break; //no export table, iterate next module
+		if (!p_local_image_export_descriptor) break; //no export table, iterate next module
 
-		ULONG_PTR pRemoteDllName = RVA_TO_REMOTE_VA(
+		const auto p_remote_dll_name = RVA_TO_REMOTE_VA(
 			char*,
-			pLocalImageExportDescriptor->Name);
-		pLocalDllName = REMOTE_ARRAY_ZEROENDED_NOLEN(char, pRemoteDllName);
+			p_local_image_export_descriptor->Name);
+		p_local_dll_name = REMOTE_ARRAY_ZEROENDED_NOLEN(char, p_remote_dll_name);
 
-		printf("dllName is %s \n", pLocalDllName);
+		printf("dllName is %s \n", p_local_dll_name);
 
-		if (0 != strcmp(ExportContext->ModuleName, pLocalDllName)) break; //not our dll, iterate next module
-		bIterateMore = false; //we've found our dll no need to iterate more modules
+		if (0 != strcmp(export_context->module_name, p_local_dll_name)) break; //not our dll, iterate next module
+		b_iterate_more = false; //we've found our dll no need to iterate more modules
 
-		ULONG_PTR pRemoteNames =
-			RVA_TO_REMOTE_VA(DWORD*, pLocalImageExportDescriptor->AddressOfNames);
-		ULONG_PTR pRemoteAddrs =
-			RVA_TO_REMOTE_VA(DWORD*, pLocalImageExportDescriptor->AddressOfFunctions);
+		const auto p_remote_names =
+			RVA_TO_REMOTE_VA(DWORD*, p_local_image_export_descriptor->AddressOfNames);
+		const auto p_remote_addrs =
+			RVA_TO_REMOTE_VA(DWORD*, p_local_image_export_descriptor->AddressOfFunctions);
 
-		pLocalNames = REMOTE_ARRAY_FIXED(DWORD, pRemoteNames, pLocalImageExportDescriptor->NumberOfNames);
-		pLocalAddrs = REMOTE_ARRAY_FIXED(DWORD, pRemoteAddrs, pLocalImageExportDescriptor->NumberOfFunctions);
+		p_local_names = REMOTE_ARRAY_FIXED(DWORD, p_remote_names, p_local_image_export_descriptor->NumberOfNames);
+		p_local_addrs = REMOTE_ARRAY_FIXED(DWORD, p_remote_addrs, p_local_image_export_descriptor->NumberOfFunctions);
 
-		if (pLocalImageExportDescriptor->NumberOfNames != pLocalImageExportDescriptor->NumberOfFunctions)
+		if (p_local_image_export_descriptor->NumberOfNames != p_local_image_export_descriptor->NumberOfFunctions)
 		{
 			printf("FindExport: ERROR: VERY STRANGE mismatch NumberOfNames vs NumberOfFunctions \n");
 			//TODO printf args ...
 			break;
 		}
 
-		for (int i = 0; i < pLocalImageExportDescriptor->NumberOfNames; i++)
+		for (auto i = 0; i < p_local_image_export_descriptor->NumberOfNames; i++)
 		{
-			ULONG_PTR pRemoteString = RVA_TO_REMOTE_VA(char*, pLocalNames[i]);
-			char* pLocalString = REMOTE_ARRAY_ZEROENDED_NOLEN(char, pRemoteString);
+			const auto p_remote_string = RVA_TO_REMOTE_VA(char*, p_local_names[i]);
+			const auto p_local_string = REMOTE_ARRAY_ZEROENDED_NOLEN(char, p_remote_string);
 
 			//printf("Function: %s at %p \n", pLocalString, pLocalAddrs[i]);
 
-			if (0 == strcmp(ExportContext->FunctionName, pLocalString))
+			if (0 == strcmp(export_context->function_name, p_local_string))
 			{
-				bFound = true; //stop iterating, we found it
-				ExportContext->RemoteFunctionAddress = pRemoteImageBase + pLocalAddrs[i];
-				free(pLocalString);
+				b_found = true; //stop iterating, we found it
+				export_context->remote_function_address = p_remote_image_base + p_local_addrs[i];
+				free(p_local_string);
 				break;
 			}
-			free(pLocalString);
+			free(p_local_string);
 		}
 
 		break;
 	}
 
-	if ((!bIterateMore)&(!bFound))
+	if ((!b_iterate_more)&(!b_found))
 	{
 		printf("FindExport: ERROR: VERY STRANGE function was not found \n");
 	}
 
-	if (pLocalNames) free(pLocalNames);
-	if (pLocalAddrs) free(pLocalAddrs);
-	if (pLocalImageExportDescriptor) free(pLocalImageExportDescriptor);
-	if (pLocalDllName) free(pLocalDllName);
-	return bIterateMore;
+	if (p_local_names) free(p_local_names);
+	if (p_local_addrs) free(p_local_addrs);
+	if (p_local_image_export_descriptor) free(p_local_image_export_descriptor);
+	if (p_local_dll_name) free(p_local_dll_name);
+	return b_iterate_more;
 }
 
 //some artifact about working with imports

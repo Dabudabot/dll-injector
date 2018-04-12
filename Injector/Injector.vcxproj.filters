@@ -30,6 +30,9 @@
     <ClInclude Include="nativeapi.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="injector.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
