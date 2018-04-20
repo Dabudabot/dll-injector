@@ -1,30 +1,27 @@
+// main.cpp -	starting point of the program
+//				defines of recieves from user input app name and dll home
+//				call injector factory to get correct injector and starts the injection
+//
+
 #include "stdafx.h"
-#include "injector.h"
 #include "injector_factory.h"
 
-
-#if 0
-typedef HMODULE(__stdcall *PFN_LoadLibraryW)(LPCWSTR lpLibFileName);
-//this code was used to obtain shellcode
-PFN_LoadLibraryW g_pLoadLibraryW = LoadLibraryW;
-wchar_t* g_pString = L"kernel32.dll";
-DWORD _declspec(noinline) Func()
-{
-	if (nullptr == g_pLoadLibraryW(g_pString))
-	{
-		return 0xFFFFFFFF;
-	}
-	return 0;
-}
-#endif
-
+/**
+ * \brief starting point
+ * \param argc number of arguments
+ * \param argv arguments
+ * \return 0 if success
+ */
 int _tmain(int argc, _TCHAR* argv[])
 {
-	const auto app_name = L"C:\\Windows\\SysWOW64\\notepad.exe";
+	//const auto app_name = L"C:\\Windows\\SysWOW64\\notepad.exe";
+	const auto app_name = L"C:\\Windows\\System32\\notepad.exe";
+	const auto dll_home = L"E:\Documents\Visual Studio 2017\Projects\RE-S18";
+	
+	InjectorFactory injectorFactory(app_name);
+	auto injector = injectorFactory.getInjector();
 
-	InjectorFactory injector_factory(app_name);
-	injector_factory.m_injector->doInjection();
-
+	injector->doInjection(dll_home);
 
 	return 0;
 }

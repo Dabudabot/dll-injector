@@ -7,5 +7,11 @@ Injector64::Injector64(const STARTUPINFO startupInfo, const PROCESS_INFORMATION 
 	m_startupInfo = startupInfo;
 	m_processInfo = processInfo;
 	m_hProcess = processInfo.hProcess;
-	m_lpDllName = L"E:\\Documents\\Visual Studio 2017\\Projects\\RE-S18\\x64\\Debug\\MyDll.dll";
+	m_lpDllName = L"\\x64\\Debug\\MyDll.dll";
 }
+
+void Injector64::doInjection(LPCTSTR dllHome)
+{
+	printf("Here I am");
+}
+

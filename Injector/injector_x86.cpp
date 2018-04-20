@@ -7,5 +7,10 @@ Injector86::Injector86(const STARTUPINFO startupInfo, const PROCESS_INFORMATION 
 	m_startupInfo = startupInfo;
 	m_processInfo = processInfo;
 	m_hProcess = processInfo.hProcess;
-	m_lpDllName = L"E:\\Documents\\Visual Studio 2017\\Projects\\RE-S18\\x64\\Debug\\MyDll.dll";
+	m_lpDllName = L"\\Debug\\MyDll.dll";
+}
+
+void Injector86::doInjection(LPCTSTR dllHome)
+{
+
 }

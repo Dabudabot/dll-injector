@@ -21,6 +21,7 @@ public:
 	// Overrides
 public:
 	ULONG_PTR			findRemoteEntryPoint();
+	virtual void		doInjection(_In_ LPCTSTR dllHome) = 0;
 
 	// Attributes
 public:

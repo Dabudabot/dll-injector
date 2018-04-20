@@ -13,6 +13,7 @@ public:
 
 	// Overrides
 public:
+	void		doInjection(_In_ LPCTSTR dllHome) override;
 
 	// Attributes
 public:
