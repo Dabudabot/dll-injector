@@ -59,23 +59,6 @@ PIMAGE_NT_HEADERS GetLocalPeHeader(REMOTE_ARGS_DEFS, bool* pis64)
 	const auto p_remote_pe_header = RVA_TO_REMOTE_VA(PIMAGE_NT_HEADERS, p_local_dos_header->e_lfanew);
 	const auto p_local_pe_header = REMOTE(IMAGE_NT_HEADERS, p_remote_pe_header);
 
-#if 0
-	//check PE signature
-	DWORD Signature = pLocalPeHeader->Signature;
-	BYTE sig0 = ((BYTE*)&Signature)[0];
-	BYTE sig1 = ((BYTE*)&Signature)[1];
-	BYTE sig2 = ((BYTE*)&Signature)[2];
-	BYTE sig3 = ((BYTE*)&Signature)[3];
-	printf("PeHeader starts with %c%c%d%d \n", sig0, sig1, sig2, sig3);
-
-	BYTE* sig = REMOTE_ARRAY_FIXED(BYTE, pRemotePeHeader, 4);
-	printf("PeHeader starts with %c%c%d%d \n", sig[0], sig[1], sig[2], sig[3]);
-
-	DWORD n;
-	BYTE* sig42 = REMOTE_ARRAY_ZEROENDED(BYTE, pRemotePeHeader, n);
-	printf("PeHeader starts with %s (strlen=%d) \n", sig42, n);
-#endif
-
 	switch (p_local_pe_header->FileHeader.Machine)
 	{
 	case IMAGE_FILE_MACHINE_I386:

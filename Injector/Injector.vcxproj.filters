@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Source Files\Injectors">
+      <UniqueIdentifier>{817a162f-9319-4010-bfb1-9528c195b94d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Injectors">
+      <UniqueIdentifier>{97fd490f-074e-43f6-af4a-7597044ca7a7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -31,18 +37,39 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="injector.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Injectors</Filter>
+    </ClInclude>
+    <ClInclude Include="injector_x64.h">
+      <Filter>Header Files\Injectors</Filter>
+    </ClInclude>
+    <ClInclude Include="injector_x86.h">
+      <Filter>Header Files\Injectors</Filter>
+    </ClInclude>
+    <ClInclude Include="injector_factory.h">
+      <Filter>Header Files\Injectors</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="injector.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="pestaff.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="injector.cpp">
+      <Filter>Source Files\Injectors</Filter>
+    </ClCompile>
+    <ClCompile Include="injector_x64.cpp">
+      <Filter>Source Files\Injectors</Filter>
+    </ClCompile>
+    <ClCompile Include="injector_x86.cpp">
+      <Filter>Source Files\Injectors</Filter>
+    </ClCompile>
+    <ClCompile Include="injector_factory.cpp">
+      <Filter>Source Files\Injectors</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
