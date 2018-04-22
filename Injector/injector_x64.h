@@ -14,21 +14,21 @@ public:
 
 	// Overrides
 public:
-	bool		doInjection()			override;
-	bool		findRemoteEntryPoint()	override;
-	bool		getRemoteImageBase()	override;
-	bool		loopEntryPoint()		override;
-	bool		deLoopEntryPoint()		override;
-	bool		findLocalPeHeader()		override;
-	bool		findRemoteLoadLibrary()	override;
-	bool		inject()				override;
-	bool		findExport()			override;
+	bool		doInjection() override;
+	bool		findRemoteEntryPoint() override;
+	bool		getRemoteImageBase() override;
+	bool		loopEntryPoint() override;
+	bool		deLoopEntryPoint() override;
+	bool		findLocalPeHeader() override;
+	bool		findRemoteLoadLibrary() override;
+	bool		inject() override;
+	bool		findExport(ULONG_PTR pRemoteImageBase) override;
 
 	// Attributes
 public:
-	PIMAGE_NT_HEADERS64		m_pLocalPeHeader;
+	PIMAGE_NT_HEADERS64		m_pLocalPeHeader{};
 
-	const UCHAR g_shellcode_x64[56] =	//TODO why it requires size?
+	const UCHAR m_shellcode[56] =
 	{
 		/*0x00:*/ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,	//pLoadLibrary pointer, RUNTIME
 		/*0x08:*/ 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90,   //8x nops to fix disassembly of VS

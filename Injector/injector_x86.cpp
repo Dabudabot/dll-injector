@@ -10,11 +10,47 @@ Injector86::Injector86(const STARTUPINFO startupInfo, const PROCESS_INFORMATION 
 	m_lpDllName = L"E:\\Documents\\Visual Studio 2017\\Projects\\RE-S18\\Debug\\MyDll.dll";
 }
 
-void Injector86::doInjection()
+bool Injector86::doInjection()
 {
-
+	return false;
 }
 
-ULONG_PTR Injector86::findRemoteEntryPoint()
+bool Injector86::findRemoteEntryPoint()
 {
+	return false;
+}
+
+bool Injector86::getRemoteImageBase()
+{
+	return false;
+}
+
+bool Injector86::loopEntryPoint()
+{
+	return false;
+}
+
+bool Injector86::deLoopEntryPoint()
+{
+	return false;
+}
+
+bool Injector86::findLocalPeHeader()
+{
+	return false;
+}
+
+bool Injector86::findRemoteLoadLibrary()
+{
+	return false;
+}
+
+bool Injector86::inject()
+{
+	return false;
+}
+
+bool Injector86::findExport(ULONG_PTR pRemoteImageBase)
+{
+	return false;
 }

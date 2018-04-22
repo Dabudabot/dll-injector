@@ -113,7 +113,7 @@ public:
 		auto pRemoteLastElement = pRemoteValue;
 		DataType zeroElement;
 		memset(&zeroElement, 0, sizeof(DataType));
-		DataType currElement; //placeholder
+		
 
 		if (pRemoteValue == 0)
 		{
@@ -123,14 +123,15 @@ public:
 
 		for (;;)
 		{
+			DataType currElement; //placeholder
 			//we use ReadRemoteDataType into &CurrElement to reduce need to malloc/free it
-			DataType* pCurrElement = readRemoteDataType<DataType>(
+			readRemoteDataType<DataType>(
 				hProcess, 
-				pRemoteLastElement,
+				pRemoteLastElement, 
 				&currElement);
 
 			pRemoteLastElement += sizeof(DataType);
-			if (0 == memcmp(pCurrElement, &zeroElement, sizeof(DataType))) break;
+			if (0 == memcmp(&currElement, &zeroElement, sizeof(DataType))) break;
 		}
 
 		const auto szElements = (pRemoteLastElement - pRemoteValue) / sizeof(DataType);

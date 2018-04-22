@@ -13,12 +13,19 @@ public:
 
 	// Overrides
 public:
-	void		doInjection()			override;
-	ULONG_PTR	findRemoteEntryPoint()	override;
+	bool		doInjection() override;
+	bool		findRemoteEntryPoint() override;
+	bool		getRemoteImageBase() override;
+	bool		loopEntryPoint() override;
+	bool		deLoopEntryPoint() override;
+	bool		findLocalPeHeader() override;
+	bool		findRemoteLoadLibrary() override;
+	bool		inject() override;
+	bool		findExport(ULONG_PTR pRemoteImageBase) override;
 
 	// Attributes
 public:
-	UCHAR g_shellcode_x86[48] = //TODO why it requires size?
+	UCHAR g_shellcode[48] = //TODO why it requires size?
 	{
 		/*0x00:*/ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,	//pLoadLibrary pointer, RUNTIME
 		/*0x08:*/ 0x30, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,	//pString pointer, RUNTIME

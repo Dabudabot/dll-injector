@@ -22,13 +22,19 @@ Injector64::~Injector64()  // NOLINT
 bool Injector64::doInjection()
 {
 	printf("%s", "x64 injection begins\n");
-	getRemoteImageBase();
-	findLocalPeHeader();
-	findRemoteEntryPoint();
-	loopEntryPoint();
-	findRemoteLoadLibrary();
-	inject();
-	deLoopEntryPoint();
+	if (!getRemoteImageBase()		||  // NOLINT
+		!findLocalPeHeader()		||
+		!findRemoteEntryPoint()		||
+		!loopEntryPoint()			||
+		!findRemoteLoadLibrary()	||
+		!inject()					||
+		!deLoopEntryPoint())
+	{
+		printf("%s", "x64 injection failed\n");
+		return false;  // NOLINT
+	}
+	printf("%s", "x64 injection success\n");
+	return true;
 }
 
 bool Injector64::getRemoteImageBase()
@@ -47,16 +53,17 @@ bool Injector64::getRemoteImageBase()
 	if (status)
 	{
 		printf("ZwQueryInformationProcess failed with %x\n", status);
-		return;
+		printf("%s failed\n", "getRemoteImageBase");
+		return false;
 	}
 
 	const auto pLocalPeb = Remote::copyRemoteDataType<PEB>(m_hProcess, ULONG_PTR(pbi.PebBaseAddress));
-
-	printf("\n");
-	printf("from PEB: %p and %p\n", pLocalPeb->Reserved3[0], pLocalPeb->Reserved3[1]);
-
+	
 	m_pRemoteImageBase = ULONG_PTR(pLocalPeb->Reserved3[1]);
 	free(pLocalPeb);
+
+	printf("%s OK\n", "getRemoteImageBase");
+	return true;
 }
 
 bool Injector64::findLocalPeHeader()
@@ -65,14 +72,20 @@ bool Injector64::findLocalPeHeader()
 	const auto e_lfanew = pLocalDosHeader->e_lfanew;
 	free(pLocalDosHeader);
 
-	const auto pRemotePeHeader = rvaToRemoteVa(m_pRemoteImageBase, e_lfanew);
+	const auto pRemotePeHeader = rvaToRemoteVa<PIMAGE_NT_HEADERS>(m_pRemoteImageBase, e_lfanew);
 	m_pLocalPeHeader = Remote::copyRemoteDataType<IMAGE_NT_HEADERS64>(m_hProcess, pRemotePeHeader);
+
+	printf("%s OK\n", "findLocalPeHeader");
+	return true;
 }
 
 bool Injector64::findRemoteEntryPoint()
 {
 	const auto addressOfEntryPoint = m_pLocalPeHeader->OptionalHeader.AddressOfEntryPoint;
-	m_remoteEntryPoint = rvaToRemoteVa(m_pRemoteImageBase, addressOfEntryPoint);
+	m_remoteEntryPoint = rvaToRemoteVa<PVOID>(m_pRemoteImageBase, addressOfEntryPoint);
+
+	printf("%s OK\n", "findRemoteEntryPoint");
+	return true;
 }
 
 bool Injector64::loopEntryPoint()
@@ -83,6 +96,9 @@ bool Injector64::loopEntryPoint()
 
 	ResumeThread(m_processInfo.hThread); //resumed pathed process
 	Sleep(1000);
+
+	printf("%s OK\n", "loopEntryPoint");
+	return true;
 }
 
 bool Injector64::deLoopEntryPoint()
@@ -91,7 +107,8 @@ bool Injector64::deLoopEntryPoint()
 	if (status)
 	{
 		printf("ZwSuspendProcess failed with %x\n", status);
-		return;
+		printf("%s failed\n", "deLoopEntryPoint");
+		return false;
 	}
 
 	Remote::writeRemoteDataType<WORD>(m_hProcess, m_remoteEntryPoint, &m_originalEntryPoint);
@@ -99,9 +116,13 @@ bool Injector64::deLoopEntryPoint()
 	if (status)
 	{
 		printf("ZwResumeProcess failed with %x\n", status);
-		return;
+		printf("%s failed\n", "deLoopEntryPoint");
+		return false;
 	}
 	Sleep(1000);
+
+	printf("%s OK\n", "deLoopEntryPoint");
+	return true;
 }
 
 bool Injector64::findRemoteLoadLibrary()
@@ -109,89 +130,193 @@ bool Injector64::findRemoteLoadLibrary()
 	DWORD n_modules;
 	const auto ph_modules = getRemoteModules(m_hProcess, &n_modules);
 
-	remoteModuleWorker(m_hProcess, ph_modules, n_modules, findExport, &m_loadLibraryContext);
+	for (auto i = 0; i < n_modules; i++)
+	{
+		const auto module = ULONG_PTR(ph_modules[i]);
+		printf("	module %d at %llu \n", i, module);
+		if (!findExport(module)) break;
+	}
+
 	printf("%s!%s is at %llu \n", 
 		m_loadLibraryContext.m_moduleName, 
 		m_loadLibraryContext.m_functionName,
 		m_loadLibraryContext.m_remoteFunctionAddress);
 	free(ph_modules);
 
+	if (!m_loadLibraryContext.m_remoteFunctionAddress)
+	{
+		printf("%s cannot find LoadLibrary\n", "findRemoteLoadLibrary");
+	}
+	printf("%s OK\n", "findRemoteLoadLibrary");
 	return true;
 }
 
-bool Injector64::findExport()
+bool Injector64::findExport(const ULONG_PTR pRemoteModuleBase)
 {
-	const auto p_remoteImageExportDescriptor = rvaToRemoteVa(
-		m_pRemoteImageBase, 
+	auto bFound = false; //have I found export in this module?
+	auto bIterateMore = true; //should we iterate next module?
+
+	const auto p_remoteImageExportDescriptor = rvaToRemoteVa<PIMAGE_EXPORT_DIRECTORY>(
+		pRemoteModuleBase,
 		m_pLocalPeHeader->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress);
 	const auto p_localImageExportDescriptor = Remote::copyRemoteDataType<IMAGE_EXPORT_DIRECTORY>(m_hProcess, p_remoteImageExportDescriptor);
 
-	char* p_local_dll_name = nullptr;
-	DWORD* p_local_names = nullptr;
-	DWORD* p_local_addrs = nullptr;
+	char* p_localDllName = nullptr;
+	DWORD* p_localNames = nullptr;
+	DWORD* p_localAddrs = nullptr;
 
 	for (;;)
 	{
-		if (!p_localImageExportDescriptor) break; //no export table, iterate next module
+		if (!p_localImageExportDescriptor)
+		{
+			printf("%s","		no export table, iterate next module\n");
+			break; //no export table, iterate next module
+		} 
 
-		const auto p_remoteDllName = rvaToRemoteVa(m_pRemoteImageBase, p_localImageExportDescriptor->Name);
-		p_local_dll_name = REMOTE_ARRAY_ZEROENDED_NOLEN(char, p_remote_dll_name);
+		const auto p_remoteDllName = rvaToRemoteVa<char*>(pRemoteModuleBase, p_localImageExportDescriptor->Name);
+		p_localDllName = Remote::copyRemoteArrayZeroEnded<char>(m_hProcess, p_remoteDllName, nullptr);
 
-		printf("dllName is %s \n", p_local_dll_name);
+		printf("dllName is %s \n", p_localDllName);
 
-		if (0 != strcmp(export_context->module_name, p_local_dll_name)) break; //not our dll, iterate next module
-		b_iterate_more = false; //we've found our dll no need to iterate more modules
+		if (0 != strcmp(m_loadLibraryContext.m_moduleName, p_localDllName)) //not our dll, iterate next module
+		{
+			printf("%s", "	not our dll, iterate next module\n");
+			break; //not our dll, iterate next module
+		}
+		bIterateMore = false; //we've found our dll no need to iterate more modules
 
-		const auto p_remote_names =
-			RVA_TO_REMOTE_VA(DWORD*, p_local_image_export_descriptor->AddressOfNames);
-		const auto p_remote_addrs =
-			RVA_TO_REMOTE_VA(DWORD*, p_local_image_export_descriptor->AddressOfFunctions);
+		const auto p_remoteNames = rvaToRemoteVa<DWORD*>(pRemoteModuleBase, p_localImageExportDescriptor->AddressOfNames);
+		const auto p_remoteAddrs = rvaToRemoteVa<DWORD*>(pRemoteModuleBase, p_localImageExportDescriptor->AddressOfFunctions);
+		
+		p_localNames = Remote::copyRemoteArrayFixedLength<DWORD>(m_hProcess, p_remoteNames, p_localImageExportDescriptor->NumberOfNames);
+		p_localAddrs = Remote::copyRemoteArrayFixedLength<DWORD>(m_hProcess, p_remoteAddrs, p_localImageExportDescriptor->NumberOfFunctions);
 
-		p_local_names = REMOTE_ARRAY_FIXED(DWORD, p_remote_names, p_local_image_export_descriptor->NumberOfNames);
-		p_local_addrs = REMOTE_ARRAY_FIXED(DWORD, p_remote_addrs, p_local_image_export_descriptor->NumberOfFunctions);
-
-		if (p_local_image_export_descriptor->NumberOfNames != p_local_image_export_descriptor->NumberOfFunctions)
+		if (p_localImageExportDescriptor->NumberOfNames != p_localImageExportDescriptor->NumberOfFunctions)
 		{
 			printf("FindExport: ERROR: VERY STRANGE mismatch NumberOfNames vs NumberOfFunctions \n");
-			//TODO printf args ...
 			break;
 		}
 
-		for (auto i = 0; i < p_local_image_export_descriptor->NumberOfNames; i++)
+		for (auto i = 0; i < p_localImageExportDescriptor->NumberOfNames; i++)
 		{
-			const auto p_remote_string = RVA_TO_REMOTE_VA(char*, p_local_names[i]);
-			const auto p_local_string = REMOTE_ARRAY_ZEROENDED_NOLEN(char, p_remote_string);
+			const auto p_remoteString = rvaToRemoteVa<char*>(pRemoteModuleBase, p_localNames[i]);
+			const auto p_localString = Remote::copyRemoteArrayZeroEnded<char>(m_hProcess, p_remoteString, nullptr);
 
 			//printf("Function: %s at %p \n", pLocalString, pLocalAddrs[i]);
 
-			if (0 == strcmp(export_context->function_name, p_local_string))
+			if (0 == strcmp(m_loadLibraryContext.m_functionName, p_localString))
 			{
-				b_found = true; //stop iterating, we found it
-				export_context->remote_function_address = p_remote_image_base + p_local_addrs[i];
-				free(p_local_string);
+				bFound = true; //stop iterating, we found it
+				m_loadLibraryContext.m_remoteFunctionAddress = pRemoteModuleBase + p_localAddrs[i];
+				free(p_localString);
 				break;
 			}
-			free(p_local_string);
+			free(p_localString);
 		}
 
 		break;
 	}
 
-	if ((!b_iterate_more)&(!b_found))
+	if ((!bIterateMore)&(!bFound))
 	{
 		printf("FindExport: ERROR: VERY STRANGE function was not found \n");
 	}
 
-	if (p_local_names) free(p_local_names);
-	if (p_local_addrs) free(p_local_addrs);
-	if (p_local_image_export_descriptor) free(p_local_image_export_descriptor);
-	if (p_local_dll_name) free(p_local_dll_name);
-	return b_iterate_more;
+	if (p_localNames) free(p_localNames);
+	if (p_localAddrs) free(p_localAddrs);
+	if (p_localImageExportDescriptor) free(p_localImageExportDescriptor);
+	if (p_localDllName) free(p_localDllName);
+	return bIterateMore;
 }
 
 
 bool Injector64::inject()
 {
+	auto ret = false;
+	PVOID lp_shellcodeRemote = nullptr;
+	HANDLE h_remoteThread = nullptr;
+	const DWORD lp_dllNameSize = (wcslen(m_lpDllName) + 1) * sizeof(wchar_t);
+	const DWORD lp_shellcodeSize = sizeof(m_shellcode) + lp_dllNameSize;
 
+	for (;;)
+	{
+		//allocate remote storage
+		lp_shellcodeRemote = VirtualAllocEx(m_hProcess, nullptr, lp_shellcodeSize, MEM_COMMIT, PAGE_EXECUTE_READWRITE);
+		if (nullptr == lp_shellcodeRemote)
+		{
+			printf("VirtualAllocEx returns NULL \n");
+			break;
+		}
+		const auto dp_shellcodeRemote = DWORD_PTR(lp_shellcodeRemote);
+
+		//fill remote storage with actual shellcode
+		SIZE_T bytesWritten;
+		auto res = WriteProcessMemory(m_hProcess,
+			lp_shellcodeRemote, 
+			m_shellcode, 
+			sizeof(m_shellcode), 
+			&bytesWritten);
+
+		if (false == res)
+		{
+			printf("WriteProcessMemory failed with %d \n", GetLastError());
+			break;
+		}
+
+		//fill remote storage with string
+		res = WriteProcessMemory(m_hProcess, 
+			rvaToVa<PVOID>(dp_shellcodeRemote, sizeof(m_shellcode)),
+			m_lpDllName, 
+			lp_dllNameSize, 
+			&bytesWritten);
+
+		if (false == res)
+		{
+			printf("WriteProcessMemory failed with %d \n", GetLastError());
+			break;
+		}
+
+		//adjust pfnLoadLibrary
+		const DWORD patchedPointerRva = 0x00;
+		Remote::writeRemoteDataType<ULONG_PTR>(m_hProcess,
+			rvaToVa<ULONG_PTR>(dp_shellcodeRemote, patchedPointerRva),
+			&m_loadLibraryContext.m_remoteFunctionAddress);
+
+		DWORD tid;
+		//in case of problems try MyLoadLibrary if this is actually current process
+		h_remoteThread = CreateRemoteThread(m_hProcess,
+			nullptr,
+			0, 
+			LPTHREAD_START_ROUTINE(rvaToVa<ULONG_PTR>(dp_shellcodeRemote, 0x10)),
+			lp_shellcodeRemote,
+			0, 
+			&tid);
+		if (nullptr == h_remoteThread)
+		{
+			printf("CreateRemoteThread failed with %d \n", GetLastError());
+			break;
+		}
+
+		//wait for MyDll initialization
+		WaitForSingleObject(h_remoteThread, INFINITE);
+
+		DWORD exit_code = 0xDEADFACE;
+		GetExitCodeThread(h_remoteThread, &exit_code);
+		printf("GetExitCodeThread returns %d\n", exit_code);
+
+		ret = true;
+		break;
+	}
+
+	if (!ret)
+	{
+		if (lp_shellcodeRemote)
+		{
+			VirtualFreeEx(m_hProcess, nullptr, lp_shellcodeSize, MEM_DECOMMIT);
+		}
+	}
+
+	if (h_remoteThread) CloseHandle(h_remoteThread);
+	return ret;
 }
 
