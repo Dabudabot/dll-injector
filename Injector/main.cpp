@@ -11,7 +11,7 @@
  */
 int _tmain(int argc, _TCHAR* argv[])
 {
-	//const auto app_name = L"C:\\Windows\\SysWOW64\\notepad.exe";
+	//const auto appName = L"C:\\Windows\\SysWOW64\\notepad.exe";
 	const auto appName = L"C:\\Windows\\System32\\notepad.exe";
 	
 	InjectorFactory injectorFactory(appName);

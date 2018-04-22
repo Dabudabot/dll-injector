@@ -12,30 +12,10 @@ Injector86::Injector86(const STARTUPINFO startupInfo, const PROCESS_INFORMATION 
 
 bool Injector86::doInjection()
 {
-	return false;
+	return true;
 }
 
-bool Injector86::findRemoteEntryPoint()
-{
-	return false;
-}
-
-bool Injector86::getRemoteImageBase()
-{
-	return false;
-}
-
-bool Injector86::loopEntryPoint()
-{
-	return false;
-}
-
-bool Injector86::deLoopEntryPoint()
-{
-	return false;
-}
-
-PIMAGE_NT_HEADERS Injector86::findLocalPeHeader(ULONG_PTR base)
+PIMAGE_NT_HEADERS Injector86::findLocalPeHeader(const ULONG_PTR base)
 {
 	return nullptr;
 }

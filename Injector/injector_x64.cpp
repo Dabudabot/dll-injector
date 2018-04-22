@@ -1,32 +1,20 @@
 #include "stdafx.h"
 #include "injector_x64.h"
 
-Injector64::Injector64(const STARTUPINFO startupInfo, const PROCESS_INFORMATION processInfo)
+Injector64::Injector64(const STARTUPINFO startupInfo, const PROCESS_INFORMATION processInfo): Injector(startupInfo, processInfo)
 {
-	m_startupInfo = startupInfo;
-	m_processInfo = processInfo;
-	m_hProcess = processInfo.hProcess;
 	m_lpDllName = L"E:\\Documents\\Visual Studio 2017\\Projects\\RE-S18\\x64\\Debug\\MyDll.dll";
-
-	m_loadLibraryContext.m_moduleName = "KERNEL32.dll";
-	m_loadLibraryContext.m_functionName = "LoadLibraryW";
-	m_loadLibraryContext.m_remoteFunctionAddress = 0;
-}
-
-Injector64::~Injector64()  // NOLINT
-{
-	free(m_pLocalPeHeader);
 }
 
 bool Injector64::doInjection()
 {
 	printf("%s", "x64 injection begins\n");
-	if (!getRemoteImageBase()		||  // NOLINT
-		!findRemoteEntryPoint()		||
-		!loopEntryPoint()			||
+	if (!getRemoteImageBase<PEB64>(m_hProcess, &m_pRemoteImageBase)											||  // NOLINT
+		!findRemoteEntryPoint<IMAGE_NT_HEADERS64>(m_pRemoteImageBase, &m_remoteEntryPoint)					||
+		!loopEntryPoint(m_hProcess, m_processInfo.hThread, m_remoteEntryPoint, &m_originalEntryPoint)		||
 		!findRemoteLoadLibrary()	||
 		!inject()					||
-		!deLoopEntryPoint())
+		!deLoopEntryPoint(m_hProcess, m_remoteEntryPoint, &m_originalEntryPoint))
 	{
 		printf("%s", "x64 injection failed\n");
 		return false;  // NOLINT
@@ -35,94 +23,7 @@ bool Injector64::doInjection()
 	return true;
 }
 
-bool Injector64::getRemoteImageBase()
-{
-	PROCESS_BASIC_INFORMATION pbi;
-	ZeroMemory(&pbi, sizeof(pbi));
-	DWORD retlen = 0;
-
-	const auto status = ZwQueryInformationProcess(
-		m_hProcess,
-		0,
-		&pbi,
-		sizeof(pbi),
-		&retlen);
-
-	if (status)
-	{
-		printf("ZwQueryInformationProcess failed with %x\n", status);
-		printf("%s failed\n", "getRemoteImageBase");
-		return false;
-	}
-
-	const auto pLocalPeb = Remote::copyRemoteDataType<PEB>(m_hProcess, ULONG_PTR(pbi.PebBaseAddress));
-	
-	m_pRemoteImageBase = ULONG_PTR(pLocalPeb->Reserved3[1]);
-	free(pLocalPeb);
-
-	printf("%s OK\n", "getRemoteImageBase");
-	return true;
-}
-
-PIMAGE_NT_HEADERS Injector64::findLocalPeHeader(const ULONG_PTR base)
-{
-	const auto pLocalDosHeader = Remote::copyRemoteDataType<IMAGE_DOS_HEADER>(m_hProcess, base);
-	const auto e_lfanew = pLocalDosHeader->e_lfanew;
-	free(pLocalDosHeader);
-
-	const auto pRemotePeHeader = rvaToRemoteVa<PIMAGE_NT_HEADERS>(base, e_lfanew);
-	const auto localPeHeader = Remote::copyRemoteDataType<IMAGE_NT_HEADERS64>(m_hProcess, pRemotePeHeader);
-
-	return localPeHeader;
-}
-
-bool Injector64::findRemoteEntryPoint()
-{
-	m_pLocalPeHeader = PIMAGE_NT_HEADERS64(findLocalPeHeader(m_pRemoteImageBase));
-	const auto addressOfEntryPoint = m_pLocalPeHeader->OptionalHeader.AddressOfEntryPoint;
-	m_remoteEntryPoint = rvaToRemoteVa<PVOID>(m_pRemoteImageBase, addressOfEntryPoint);
-
-	printf("%s OK\n", "findRemoteEntryPoint");
-	return true;
-}
-
-bool Injector64::loopEntryPoint()
-{
-	WORD patchedEntryPoint = 0xFEEB;
-	Remote::readRemoteDataType<WORD>(m_hProcess, m_remoteEntryPoint, &m_originalEntryPoint);
-	Remote::writeRemoteDataType<WORD>(m_hProcess, m_remoteEntryPoint, &patchedEntryPoint);
-
-	ResumeThread(m_processInfo.hThread); //resumed pathed process
-	Sleep(1000);
-
-	printf("%s OK\n", "loopEntryPoint");
-	return true;
-}
-
-bool Injector64::deLoopEntryPoint()
-{
-	auto status = ZwSuspendProcess(m_hProcess);
-	if (status)
-	{
-		printf("ZwSuspendProcess failed with %x\n", status);
-		printf("%s failed\n", "deLoopEntryPoint");
-		return false;
-	}
-
-	Remote::writeRemoteDataType<WORD>(m_hProcess, m_remoteEntryPoint, &m_originalEntryPoint);
-	status = ZwResumeProcess(m_hProcess);
-	if (status)
-	{
-		printf("ZwResumeProcess failed with %x\n", status);
-		printf("%s failed\n", "deLoopEntryPoint");
-		return false;
-	}
-	Sleep(1000);
-
-	printf("%s OK\n", "deLoopEntryPoint");
-	return true;
-}
-
+//the same
 bool Injector64::findRemoteLoadLibrary()
 {
 	DWORD n_modules;
@@ -150,11 +51,12 @@ bool Injector64::findRemoteLoadLibrary()
 	return true;
 }
 
+//can be templated
 bool Injector64::findExport(const ULONG_PTR pRemoteModuleBase)
 {
 	auto bFound = false; //have I found export in this module?
 	auto bIterateMore = true; //should we iterate next module?
-	const auto localPeHeader = PIMAGE_NT_HEADERS64(findLocalPeHeader(pRemoteModuleBase));
+	const auto localPeHeader = findLocalPeHeader(pRemoteModuleBase);
 
 	const auto p_remoteImageExportDescriptor = rvaToRemoteVa<PIMAGE_EXPORT_DIRECTORY>(
 		pRemoteModuleBase,
@@ -230,7 +132,7 @@ bool Injector64::findExport(const ULONG_PTR pRemoteModuleBase)
 	return bIterateMore;
 }
 
-
+//can use inputs
 bool Injector64::inject()
 {
 	auto ret = false;

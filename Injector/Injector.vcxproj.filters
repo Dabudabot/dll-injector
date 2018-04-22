@@ -65,5 +65,8 @@
     <ClCompile Include="injector_factory.cpp">
       <Filter>Source Files\Injectors</Filter>
     </ClCompile>
+    <ClCompile Include="injector-impl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

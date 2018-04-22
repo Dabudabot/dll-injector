@@ -13,10 +13,6 @@ public:
 	// Overrides
 public:
 	bool					doInjection() override;
-	bool					findRemoteEntryPoint() override;
-	bool					getRemoteImageBase() override;
-	bool					loopEntryPoint() override;
-	bool					deLoopEntryPoint() override;
 	PIMAGE_NT_HEADERS		findLocalPeHeader(ULONG_PTR) override;
 	bool					findRemoteLoadLibrary() override;
 	bool					inject() override;
@@ -24,7 +20,9 @@ public:
 
 	// Attributes
 public:
-	UCHAR g_shellcode[48] = //TODO why it requires size?
+	PIMAGE_NT_HEADERS		m_pLocalPeHeader{};
+
+	UCHAR m_shellcode[48] =
 	{
 		/*0x00:*/ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,	//pLoadLibrary pointer, RUNTIME
 		/*0x08:*/ 0x30, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,	//pString pointer, RUNTIME

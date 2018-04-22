@@ -6,23 +6,16 @@ class Injector64 : public Injector  // NOLINT
 	// Constructors
 public:
 	Injector64(_In_ STARTUPINFO startupInfo, _In_ PROCESS_INFORMATION processInfo);
-	~Injector64();
 
 	// Overrides
 public:
 	bool				doInjection() override;
-	bool				findRemoteEntryPoint() override;
-	bool				getRemoteImageBase() override;
-	bool				loopEntryPoint() override;
-	bool				deLoopEntryPoint() override;
-	PIMAGE_NT_HEADERS	findLocalPeHeader(ULONG_PTR) override;
 	bool				findRemoteLoadLibrary() override;
 	bool				inject() override;
 	bool				findExport(ULONG_PTR pRemoteImageBase) override;
 
 	// Attributes
 public:
-	PIMAGE_NT_HEADERS64		m_pLocalPeHeader{};
 
 	const UCHAR m_shellcode[56] =
 	{

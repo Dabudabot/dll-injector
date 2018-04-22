@@ -52,7 +52,7 @@ public:
 	static void writeRemoteDataType(
 		_In_ const HANDLE hProcess, 
 		_In_ const ULONG_PTR pRemoteValue, 
-		_Out_ DataType* pLocalValue) {
+		_In_ DataType* pLocalValue) {
 
 		const auto byteToWrite = sizeof(DataType);
 		SIZE_T bytesWritten;
