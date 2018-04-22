@@ -35,9 +35,9 @@ bool Injector86::deLoopEntryPoint()
 	return false;
 }
 
-bool Injector86::findLocalPeHeader()
+PIMAGE_NT_HEADERS Injector86::findLocalPeHeader(ULONG_PTR base)
 {
-	return false;
+	return nullptr;
 }
 
 bool Injector86::findRemoteLoadLibrary()

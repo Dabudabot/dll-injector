@@ -1,18 +1,24 @@
-// remote.h : works with remote memory
-//
-
 #pragma once
 
-/*
+/**
+* \brief remote.h : works with remote memory 
 * pRemote pointers are expected to be ULONG_PTR to disable their dereference
 * we incorporate malloc into Copy... functions to eliminate the need of smart pointers
-*  just use free() on returned pLocal pointers when you don't need them anymore
-*/
+* just use free() on returned pLocal pointers when you don't need them anymore
+ */
 class Remote
 {
 public:
-	//this function is the same as CopyRemoteDataType but receive storage 
-	//for value in order to reduce amount of mallocs
+	/**
+	 * \brief Reads data from remote process into variable
+	 * this function is the same as CopyRemoteDataType 
+	 * but receive storage
+	 * for value in order to reduce amount of mallocs
+	 * \tparam DataType type of data to read
+	 * \param hProcess remote process to read from
+	 * \param pRemoteValue addr to read
+	 * \param pLocalValue storage variable for readed value
+	 */
 	template <typename DataType>
 	static void readRemoteDataType(
 		_In_ const HANDLE hProcess, 
@@ -35,6 +41,13 @@ public:
 		assert(bytesRead == bytesToRead);
 	}
 
+	/**
+	 * \brief Writes data to the remote process
+	 * \tparam DataType type of data to write
+	 * \param hProcess remote process to write to
+	 * \param pRemoteValue addr to write
+	 * \param pLocalValue what to write
+	 */
 	template <typename DataType>
 	static void writeRemoteDataType(
 		_In_ const HANDLE hProcess, 
@@ -55,6 +68,14 @@ public:
 		assert(bytesWritten == byteToWrite);
 	}
 
+	/**
+	 * \brief Copies data from remote process and return as a pointer
+	 * DO NOT FORGET TO FREE THIS POINTER!
+	 * \tparam DataType type of data to read
+	 * \param hProcess remote process to read from
+	 * \param pRemoteValue addr to read
+	 * \return readed data NEED TO FREE THIS POINTER
+	 */
 	template <typename DataType>
 	static DataType* copyRemoteDataType(
 		_In_ const HANDLE hProcess, 
@@ -78,6 +99,16 @@ public:
 		return pLocalValue;
 	}
 
+	/**
+	 * \brief Copies array if data from remote 
+	 * process ad return as a pointer
+	 * DO NOT FORGET TO FREE THIS POINTER!
+	 * \tparam DataType type of data to read
+	 * \param hProcess remote process to read from
+	 * \param pRemoteValue addr to read
+	 * \param nElements number of elements to read
+	 * \return readed data NEED TO FREE THIS POINTER
+	 */
 	template <typename DataType>
 	static DataType* copyRemoteArrayFixedLength(
 		_In_ const HANDLE hProcess, 
@@ -102,8 +133,18 @@ public:
 		return pLocalValue;
 	}
 
-	//reads not more than 1OK of elements (to handle possible errors if bad pointer)
-	//nElements counts zeroed element
+	/**
+	 * \brief Copies array if data from remote 
+	 * process ad return as a pointer
+	 * DO NOT FORGET TO FREE THIS POINTER!
+	 * reads not more than 1OK of elements 
+	 * (to handle possible errors if bad pointer)
+	 * \tparam DataType type of data to read
+	 * \param hProcess remote process to read from
+	 * \param pRemoteValue addr to read
+	 * \param pnElements counts zeroed element
+	 * \return 
+	 */
 	template <typename DataType>
 	static DataType* copyRemoteArrayZeroEnded(
 		_In_ const HANDLE hProcess,

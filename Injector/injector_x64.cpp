@@ -1,8 +1,7 @@
-
 #include "stdafx.h"
 #include "injector_x64.h"
 
-Injector64::Injector64(const STARTUPINFO startupInfo, const PROCESS_INFORMATION processInfo) : Injector()
+Injector64::Injector64(const STARTUPINFO startupInfo, const PROCESS_INFORMATION processInfo)
 {
 	m_startupInfo = startupInfo;
 	m_processInfo = processInfo;
@@ -23,7 +22,6 @@ bool Injector64::doInjection()
 {
 	printf("%s", "x64 injection begins\n");
 	if (!getRemoteImageBase()		||  // NOLINT
-		!findLocalPeHeader()		||
 		!findRemoteEntryPoint()		||
 		!loopEntryPoint()			||
 		!findRemoteLoadLibrary()	||
@@ -66,21 +64,21 @@ bool Injector64::getRemoteImageBase()
 	return true;
 }
 
-bool Injector64::findLocalPeHeader()
+PIMAGE_NT_HEADERS Injector64::findLocalPeHeader(const ULONG_PTR base)
 {
-	const auto pLocalDosHeader = Remote::copyRemoteDataType<IMAGE_DOS_HEADER>(m_hProcess, m_pRemoteImageBase);
+	const auto pLocalDosHeader = Remote::copyRemoteDataType<IMAGE_DOS_HEADER>(m_hProcess, base);
 	const auto e_lfanew = pLocalDosHeader->e_lfanew;
 	free(pLocalDosHeader);
 
-	const auto pRemotePeHeader = rvaToRemoteVa<PIMAGE_NT_HEADERS>(m_pRemoteImageBase, e_lfanew);
-	m_pLocalPeHeader = Remote::copyRemoteDataType<IMAGE_NT_HEADERS64>(m_hProcess, pRemotePeHeader);
+	const auto pRemotePeHeader = rvaToRemoteVa<PIMAGE_NT_HEADERS>(base, e_lfanew);
+	const auto localPeHeader = Remote::copyRemoteDataType<IMAGE_NT_HEADERS64>(m_hProcess, pRemotePeHeader);
 
-	printf("%s OK\n", "findLocalPeHeader");
-	return true;
+	return localPeHeader;
 }
 
 bool Injector64::findRemoteEntryPoint()
 {
+	m_pLocalPeHeader = PIMAGE_NT_HEADERS64(findLocalPeHeader(m_pRemoteImageBase));
 	const auto addressOfEntryPoint = m_pLocalPeHeader->OptionalHeader.AddressOfEntryPoint;
 	m_remoteEntryPoint = rvaToRemoteVa<PVOID>(m_pRemoteImageBase, addressOfEntryPoint);
 
@@ -143,9 +141,10 @@ bool Injector64::findRemoteLoadLibrary()
 		m_loadLibraryContext.m_remoteFunctionAddress);
 	free(ph_modules);
 
-	if (!m_loadLibraryContext.m_remoteFunctionAddress)
+	if (!m_loadLibraryContext.m_remoteFunctionAddress)  // NOLINT
 	{
 		printf("%s cannot find LoadLibrary\n", "findRemoteLoadLibrary");
+		return false;  // NOLINT
 	}
 	printf("%s OK\n", "findRemoteLoadLibrary");
 	return true;
@@ -155,11 +154,13 @@ bool Injector64::findExport(const ULONG_PTR pRemoteModuleBase)
 {
 	auto bFound = false; //have I found export in this module?
 	auto bIterateMore = true; //should we iterate next module?
+	const auto localPeHeader = PIMAGE_NT_HEADERS64(findLocalPeHeader(pRemoteModuleBase));
 
 	const auto p_remoteImageExportDescriptor = rvaToRemoteVa<PIMAGE_EXPORT_DIRECTORY>(
 		pRemoteModuleBase,
-		m_pLocalPeHeader->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress);
-	const auto p_localImageExportDescriptor = Remote::copyRemoteDataType<IMAGE_EXPORT_DIRECTORY>(m_hProcess, p_remoteImageExportDescriptor);
+		localPeHeader->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress);
+	const auto p_localImageExportDescriptor = Remote::copyRemoteDataType<IMAGE_EXPORT_DIRECTORY>(
+		m_hProcess, p_remoteImageExportDescriptor);
 
 	char* p_localDllName = nullptr;
 	DWORD* p_localNames = nullptr;
@@ -169,14 +170,14 @@ bool Injector64::findExport(const ULONG_PTR pRemoteModuleBase)
 	{
 		if (!p_localImageExportDescriptor)
 		{
-			printf("%s","		no export table, iterate next module\n");
+			printf("%s","	no export table, iterate next module\n");
 			break; //no export table, iterate next module
 		} 
 
 		const auto p_remoteDllName = rvaToRemoteVa<char*>(pRemoteModuleBase, p_localImageExportDescriptor->Name);
 		p_localDllName = Remote::copyRemoteArrayZeroEnded<char>(m_hProcess, p_remoteDllName, nullptr);
 
-		printf("dllName is %s \n", p_localDllName);
+		printf("	dllName is %s \n", p_localDllName);
 
 		if (0 != strcmp(m_loadLibraryContext.m_moduleName, p_localDllName)) //not our dll, iterate next module
 		{

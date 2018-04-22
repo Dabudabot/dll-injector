@@ -29,15 +29,15 @@ public:
 
 	// Overrides
 public:
-	virtual bool		doInjection() = 0;
-	virtual bool		findRemoteEntryPoint() = 0;
-	virtual bool		getRemoteImageBase() = 0;
-	virtual bool		loopEntryPoint() = 0;
-	virtual bool		deLoopEntryPoint() = 0;
-	virtual bool		findLocalPeHeader() = 0;
-	virtual bool		findRemoteLoadLibrary() = 0;
-	virtual bool		inject() = 0;
-	virtual bool		findExport(ULONG_PTR pRemoteImageBase) = 0;
+	virtual bool					doInjection() = 0;
+	virtual bool					findRemoteEntryPoint() = 0;
+	virtual bool					getRemoteImageBase() = 0;
+	virtual bool					loopEntryPoint() = 0;
+	virtual bool					deLoopEntryPoint() = 0;
+	virtual PIMAGE_NT_HEADERS		findLocalPeHeader(ULONG_PTR base) = 0;
+	virtual bool					findRemoteLoadLibrary() = 0;
+	virtual bool					inject() = 0;
+	virtual bool					findExport(ULONG_PTR pRemoteImageBase) = 0;
 	
 	// Attributes
 public:
@@ -51,5 +51,4 @@ public:
 	WORD					m_originalEntryPoint;
 
 	FunctionContext			m_loadLibraryContext;
-	
 };
