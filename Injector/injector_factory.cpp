@@ -8,15 +8,6 @@ InjectorFactory::InjectorFactory(const LPCTSTR lpAppName)
 	generateInjector();
 }
 
-void InjectorFactory::is86()
-{
-	if (!IsWow64Process(m_processInfo.hProcess, &m_is86))
-	{
-		printf("IsWow64Process failed with %lu\n", GetLastError());
-	}
-	printf("Remote process is %s\n", m_is86 ? "x86" : "x64");
-}
-
 void InjectorFactory::createProcess(const LPCTSTR lpAppName)
 {
 	ZeroMemory(&m_startupInfo, sizeof(m_startupInfo));
@@ -40,6 +31,15 @@ void InjectorFactory::createProcess(const LPCTSTR lpAppName)
 	Sleep(1000);
 }
 
+void InjectorFactory::is86()
+{
+	if (!IsWow64Process(m_processInfo.hProcess, &m_is86))
+	{
+		printf("IsWow64Process failed with %lu\n", GetLastError());
+	}
+	printf("Remote process is %s\n", m_is86 ? "x86" : "x64");
+}
+
 void InjectorFactory::generateInjector()
 {	
 	if (m_is86)
@@ -58,7 +58,7 @@ InjectorFactory::~InjectorFactory()  // NOLINT
 	CloseHandle(m_processInfo.hThread);
 }
 
-PINJECTOR InjectorFactory::getInjector() const
+InjectorFactory::PINJECTOR InjectorFactory::getInjector() const
 {
 	return m_injector;
 }

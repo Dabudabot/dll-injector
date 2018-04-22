@@ -7,16 +7,27 @@ class Injector64 : public Injector
 	// Constructors
 public:
 	Injector64(_In_ STARTUPINFO startupInfo, _In_ PROCESS_INFORMATION processInfo);
+	~Injector64();
 
 	// Methods
 public:
 
 	// Overrides
 public:
-	void		doInjection(_In_ LPCTSTR dllHome) override;
+	bool		doInjection()			override;
+	bool		findRemoteEntryPoint()	override;
+	bool		getRemoteImageBase()	override;
+	bool		loopEntryPoint()		override;
+	bool		deLoopEntryPoint()		override;
+	bool		findLocalPeHeader()		override;
+	bool		findRemoteLoadLibrary()	override;
+	bool		inject()				override;
+	bool		findExport()			override;
 
 	// Attributes
 public:
+	PIMAGE_NT_HEADERS64		m_pLocalPeHeader;
+
 	const UCHAR g_shellcode_x64[56] =	//TODO why it requires size?
 	{
 		/*0x00:*/ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,	//pLoadLibrary pointer, RUNTIME

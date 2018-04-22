@@ -2,39 +2,41 @@
 
 #pragma comment(lib, "ntdll.lib")
 
-typedef struct peb {
-	BYTE                          reserved1[2];
-	BYTE                          being_debugged;
-	BYTE                          reserved2[1];
-	PVOID                         reserved3[2];
+// ReSharper disable CppInconsistentNaming because of Native
+typedef struct _PEB {
+	BYTE                          Reserved1[2];
+	BYTE                          BeingDebugged;
+	BYTE                          Reserved2[1];
+	PVOID                         Reserved3[2];
 	//PPEB_LDR_DATA                 Ldr;
-	PVOID                         ldr;
+	PVOID                         Ldr;
 	//PRTL_USER_PROCESS_PARAMETERS  ProcessParameters;
-	PVOID                         process_parameters;
-	BYTE                          reserved4[104];
-	PVOID                         reserved5[52];
+	PVOID                         ProcessParameters;
+	BYTE                          Reserved4[104];
+	PVOID                         Reserved5[52];
 	//PPS_POST_PROCESS_INIT_ROUTINE PostProcessInitRoutine;
-	PVOID                         post_process_init_routine;
-	BYTE                          reserved6[128];
-	PVOID                         reserved7[1];
-	ULONG                         session_id;
-} peb, *ppeb;
+	PVOID                         PostProcessInitRoutine;
+	BYTE                          Reserved6[128];
+	PVOID                         Reserved7[1];
+	ULONG                         SessionId;
+} PEB, *PPEB;
 
-
-typedef struct process_basic_information {
-	PVOID						reserved1;
-	ppeb						peb_base_address;
-	PVOID						reserved2[2];
-	ULONG_PTR					unique_process_id;
-	PVOID						reserved3;
-} process_basic_information;
+typedef struct _PROCESS_BASIC_INFORMATION {
+	PVOID						Reserved1;
+	PPEB						PebBaseAddress;
+	PVOID						Reserved2[2];
+	ULONG_PTR					UniqueProcessId;
+	PVOID						Reserved3;
+} PROCESS_BASIC_INFORMATION;
 
 extern "C" NTSTATUS WINAPI ZwQueryInformationProcess(
-	_In_      HANDLE           processHandle,
-	_In_      DWORD            processInformationClass,
-	_Out_     PVOID            processInformation,
-	_In_      ULONG            processInformationLength,
-	_Out_opt_ PULONG           returnLength
+	_In_      HANDLE			ProcessHandle,
+	_In_      DWORD				ProcessInformationClass,
+	_Out_     PVOID				ProcessInformation,
+	_In_      ULONG				ProcessInformationLength,
+	_Out_opt_ PULONG			ReturnLength
 );
+
 extern "C" NTSYSCALLAPI NTSTATUS NTAPI ZwSuspendProcess(__in HANDLE processHandle);
 extern "C" NTSYSCALLAPI NTSTATUS NTAPI ZwResumeProcess(__in HANDLE processHandle);
+// ReSharper restore CppInconsistentNaming because of Native

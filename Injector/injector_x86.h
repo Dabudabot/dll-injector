@@ -13,7 +13,8 @@ public:
 
 	// Overrides
 public:
-	void		doInjection(_In_ LPCTSTR dllHome) override;
+	void		doInjection()			override;
+	ULONG_PTR	findRemoteEntryPoint()	override;
 
 	// Attributes
 public:
