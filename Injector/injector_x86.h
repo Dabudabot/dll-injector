@@ -7,22 +7,13 @@ class Injector86 : public Injector
 public:
 	Injector86(_In_ STARTUPINFO startupInfo, _In_ PROCESS_INFORMATION processInfo);
 
-	// Methods
-public:
-
 	// Overrides
 public:
-	bool					doInjection() override;
-	PIMAGE_NT_HEADERS		findLocalPeHeader(ULONG_PTR) override;
-	bool					findRemoteLoadLibrary() override;
-	bool					inject() override;
-	bool					findExport(ULONG_PTR pRemoteImageBase) override;
+	bool				doInjection() override;
 
 	// Attributes
-public:
-	PIMAGE_NT_HEADERS		m_pLocalPeHeader{};
-
-	UCHAR m_shellcode[48] =
+private:
+	const UCHAR m_shellcode[48] =
 	{
 		/*0x00:*/ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,	//pLoadLibrary pointer, RUNTIME
 		/*0x08:*/ 0x30, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,	//pString pointer, RUNTIME

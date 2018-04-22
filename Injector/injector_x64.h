@@ -1,7 +1,7 @@
 #pragma once
 #include "injector.h"
 
-class Injector64 : public Injector  // NOLINT
+class Injector64 : public Injector
 {
 	// Constructors
 public:
@@ -10,13 +10,9 @@ public:
 	// Overrides
 public:
 	bool				doInjection() override;
-	bool				findRemoteLoadLibrary() override;
-	bool				inject() override;
-	bool				findExport(ULONG_PTR pRemoteImageBase) override;
 
 	// Attributes
-public:
-
+private:
 	const UCHAR m_shellcode[56] =
 	{
 		/*0x00:*/ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,	//pLoadLibrary pointer, RUNTIME
