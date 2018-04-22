@@ -25,7 +25,7 @@ public:
 	template<typename Peb>		static bool			getRemoteImageBase(_In_ HANDLE hProcess, _Out_ ULONG_PTR* pRemoteImageBase);
 	template<typename Headers>	static bool			findRemoteEntryPoint(_In_ HANDLE hProcess, _In_ ULONG_PTR pRemoteImageBase, _Out_ ULONG_PTR* pRemoteEntryPoint);
 	template<typename Headers>	static Headers*		findLocalPeHeader(_In_ HANDLE hProcess, _In_ ULONG_PTR base);
-	template<typename Headers>	static bool			findRemoteLoadLibrary(_In_ HANDLE hProcess, _In_ FunctionContext context);
+	template<typename Headers>	static bool			findRemoteLoadLibrary(_In_ HANDLE hProcess, _In_ FunctionContext* context);
 	template<typename Headers>	static bool			findExport(_In_ ULONG_PTR pRemoteModuleBase, _In_ HANDLE hProcess, _In_ FunctionContext* context);
 
 	// Methods
@@ -41,7 +41,8 @@ public:
 														_In_ WORD* originalEntryPointValue);
 	static bool							inject(_In_ HANDLE hProcess, 
 												_In_ LPCTSTR lpDllName,
-												_In_ const UCHAR shellcode[], 
+												_In_ const UCHAR* shellcode,
+												_In_ SIZE_T szShellcode,
 												_In_ FunctionContext context);
 	
 
@@ -126,7 +127,7 @@ Headers* Injector::findLocalPeHeader(const HANDLE hProcess, const ULONG_PTR base
 }
 
 template <typename Headers>
-bool Injector::findRemoteLoadLibrary(const HANDLE hProcess, FunctionContext context)
+bool Injector::findRemoteLoadLibrary(const HANDLE hProcess, FunctionContext* context)
 {
 	DWORD n_modules;
 	const auto ph_modules = getRemoteModules(hProcess, &n_modules);
@@ -135,16 +136,16 @@ bool Injector::findRemoteLoadLibrary(const HANDLE hProcess, FunctionContext cont
 	{
 		const auto module = ULONG_PTR(ph_modules[i]);
 		printf("	module %d at %llu \n", i, module);
-		if (!findExport<Headers>(module, hProcess, &context)) break;
+		if (!findExport<Headers>(module, hProcess, context)) break;
 	}
 
 	printf("%s!%s is at %llu \n",
-		context.m_moduleName,
-		context.m_functionName,
-		context.m_remoteFunctionAddress);
+		context->m_moduleName,
+		context->m_functionName,
+		context->m_remoteFunctionAddress);
 	free(ph_modules);
 
-	if (!context.m_remoteFunctionAddress)  // NOLINT
+	if (!context->m_remoteFunctionAddress)  // NOLINT
 	{
 		printf("%s cannot find LoadLibrary\n", "findRemoteLoadLibrary");
 		return false;  // NOLINT

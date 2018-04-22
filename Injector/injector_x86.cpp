@@ -12,8 +12,8 @@ bool Injector86::doInjection()
 	if (!getRemoteImageBase<PEB32>(m_hProcess, &m_pRemoteImageBase)										||  // NOLINT
 		!findRemoteEntryPoint<IMAGE_NT_HEADERS32>(m_hProcess, m_pRemoteImageBase, &m_remoteEntryPoint)	||
 		!loopEntryPoint(m_hProcess, m_processInfo.hThread, m_remoteEntryPoint, &m_originalEntryPoint)	||
-		!findRemoteLoadLibrary<IMAGE_NT_HEADERS32>(m_hProcess, m_loadLibraryContext)					||
-		!inject(m_hProcess, m_lpDllName, m_shellcode, m_loadLibraryContext)								||
+		!findRemoteLoadLibrary<IMAGE_NT_HEADERS32>(m_hProcess, &m_loadLibraryContext)					||
+		!inject(m_hProcess, m_lpDllName, m_shellcode, m_szShellcode, m_loadLibraryContext)				||
 		!deLoopEntryPoint(m_hProcess, m_remoteEntryPoint, &m_originalEntryPoint))
 	{
 		printf("%s", "x86 injection failed\n");

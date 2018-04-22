@@ -12,8 +12,8 @@ bool Injector64::doInjection()
 	if (!getRemoteImageBase<PEB64>(m_hProcess, &m_pRemoteImageBase)										||  // NOLINT
 		!findRemoteEntryPoint<IMAGE_NT_HEADERS64>(m_hProcess, m_pRemoteImageBase, &m_remoteEntryPoint)	||
 		!loopEntryPoint(m_hProcess, m_processInfo.hThread, m_remoteEntryPoint, &m_originalEntryPoint)	||
-		!findRemoteLoadLibrary<IMAGE_NT_HEADERS64>(m_hProcess, m_loadLibraryContext)					||
-		!inject(m_hProcess, m_lpDllName, m_shellcode, m_loadLibraryContext)								||
+		!findRemoteLoadLibrary<IMAGE_NT_HEADERS64>(m_hProcess, &m_loadLibraryContext)					||
+		!inject(m_hProcess, m_lpDllName, m_shellcode, m_szShellcode, m_loadLibraryContext)				||
 		!deLoopEntryPoint(m_hProcess, m_remoteEntryPoint, &m_originalEntryPoint))
 	{
 		printf("%s", "x64 injection failed\n");

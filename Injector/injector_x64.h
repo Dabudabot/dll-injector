@@ -13,6 +13,7 @@ public:
 
 	// Attributes
 private:
+	const SIZE_T m_szShellcode = 56;
 	const UCHAR m_shellcode[56] =
 	{
 		/*0x00:*/ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,	//pLoadLibrary pointer, RUNTIME
