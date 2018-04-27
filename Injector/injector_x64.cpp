@@ -3,7 +3,7 @@
 
 Injector64::Injector64(const STARTUPINFO startupInfo, const PROCESS_INFORMATION processInfo) : Injector(startupInfo, processInfo)
 {
-	m_lpDllName = L"E:\\Documents\\Visual Studio 2017\\Projects\\RE-S18\\x64\\Debug\\MyDll.dll";
+	m_lpDllName = L"C:\\Users\\Daulet\\source\\repos\\RE-S18\\RE-S18\\x64\\Debug\\MyDll.dll";
 }
 
 bool Injector64::doInjection()
