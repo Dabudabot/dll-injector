@@ -1,17 +1,9 @@
 #pragma once
 class Hooker
 {
+	// Structs
 public:
-	Hooker();
-	~Hooker();
-
-	bool initHook();
-	bool initByAddr();
-	bool insertHook();
-	bool unhook();
-	bool freeHook();
-
-	struct HOOK 
+	struct HOOK
 	{
 		bool isHooked;
 		void* pFunction;
@@ -20,5 +12,22 @@ public:
 		char apiBytes[6];
 		void* pApiFunction;
 	};
+
+	// Constructors
+public:
+	Hooker();
+	~Hooker();
+
+	// Methods
+public:
+	bool initHook();
+	bool initByAddr();
+	bool insertHook();
+	bool unhook();
+	bool freeHook();
+
+	// Attributes
+public:
+	HMODULE m_hModule;
 };
 
