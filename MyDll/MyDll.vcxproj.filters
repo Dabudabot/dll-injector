@@ -21,27 +21,12 @@
     <ClInclude Include="targetver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="hooker.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="hooker_swarm.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="detour.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="dllmain.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="hooker.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="hooker_swarm.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
