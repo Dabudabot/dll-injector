@@ -1,9 +1,10 @@
+// injector_x86.cpp : reslization of injection logic for x86 app
 #include "stdafx.h"
 #include "injector_x86.h"
 
 Injector86::Injector86(const STARTUPINFO startupInfo, const PROCESS_INFORMATION processInfo) : Injector(startupInfo, processInfo)
 {
-	m_lpDllName = L"E:\\Documents\\Visual Studio 2017\\Projects\\RE-S18\\Debug\\MyDll.dll";
+	m_lpDllName = L"E:\\Documents\\Visual Studio 2017\\Projects\\RE-S18\\Debug\\MyDll.dll";	//path to DLL to be injected
 }
 
 bool Injector86::doInjection()

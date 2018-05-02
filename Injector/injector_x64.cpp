@@ -1,9 +1,10 @@
+// injector_x64.cpp : reslization of injection logic for x64 app
 #include "stdafx.h"
 #include "injector_x64.h"
 
 Injector64::Injector64(const STARTUPINFO startupInfo, const PROCESS_INFORMATION processInfo) : Injector(startupInfo, processInfo)
 {
-	m_lpDllName = L"C:\\Users\\Daulet\\source\\repos\\RE-S18\\RE-S18\\x64\\Debug\\MyDll.dll";
+	m_lpDllName = L"C:\\Users\\Daulet\\source\\repos\\RE-S18\\RE-S18\\x64\\Debug\\MyDll.dll"; //path to DLL to be injected
 }
 
 bool Injector64::doInjection()

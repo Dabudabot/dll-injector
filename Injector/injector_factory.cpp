@@ -1,20 +1,21 @@
+// injector_factory.cpp : injector factory realization
 #include "stdafx.h"
 #include "injector_factory.h"
 
 InjectorFactory::InjectorFactory(const LPCTSTR lpAppName)
 {
-	createProcess(lpAppName);
-	is86();
-	generateInjector();
+	createProcess(lpAppName);	//create suspended process in which we need to inject
+	is86();						//get is process x64 or x86
+	generateInjector();			//run injector depending on x64 or x86
 }
 
 void InjectorFactory::createProcess(const LPCTSTR lpAppName)
 {
-	ZeroMemory(&m_startupInfo, sizeof(m_startupInfo));
+	ZeroMemory(&m_startupInfo, sizeof(m_startupInfo));		//Zero variables
 	m_startupInfo.cb = sizeof(m_startupInfo);
 	ZeroMemory(&m_processInfo, sizeof(m_processInfo));
 
-	if (!::CreateProcess(lpAppName,
+	if (!::CreateProcess(lpAppName,							//create process suspended
 		nullptr,
 		nullptr,
 		nullptr,
@@ -28,7 +29,7 @@ void InjectorFactory::createProcess(const LPCTSTR lpAppName)
 		printf("CreateProcess failed (%d).\n", GetLastError());
 		return;
 	}
-	Sleep(1000);
+	Sleep(1000);											//pause to let process be created
 }
 
 void InjectorFactory::is86()

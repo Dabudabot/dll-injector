@@ -1,3 +1,4 @@
+// main.cpp : program starts here
 #include "stdafx.h"
 #include "injector_factory.h"
 
