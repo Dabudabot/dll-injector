@@ -1,24 +1,18 @@
 #pragma once
+#include "hooker.h"
+#include <vector>
+#include "detour.h"
+
 class HookerSwarm
 {
-	// Constructors
-public:
-	HookerSwarm(_In_ HMODULE hModule);
-	~HookerSwarm();
-
 	// Methods
 public:
 	bool initializeHooks();
 	bool deinitializeHooks();
+private:
+	bool initializeHook(_In_ LPCTSTR moduleName, _In_ LPCSTR functionName, _In_ void* pfnHook, _Out_ void* pfnOriginal);
 
 	// Attributes
 public:
-	HMODULE m_hModule;
+	std::vector<Hooker> m_hookers;
 };
-
-//public:
-	//functions typedefs
-
-	//attach
-
-	//hook

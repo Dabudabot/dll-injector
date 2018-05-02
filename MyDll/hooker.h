@@ -3,31 +3,33 @@ class Hooker
 {
 	// Structs
 public:
-	struct HOOK
+	struct Hook
 	{
-		bool isHooked;
-		void* pFunction;
-		void* pHookFunction;
-		char jmp[6];
-		char apiBytes[6];
-		void* pApiFunction;
+		LPCTSTR m_moduleName;
+		LPCSTR	m_functionName;
+		bool	m_isHooked;
+		void*	m_pOriginalFunction;
+		void*	m_pHookFunction;
+		char	m_jmp[6];
+		char	m_apiBytes[6];
+		void*	m_pApiFunction;
 	};
 
 	// Constructors
 public:
-	Hooker();
+	Hooker(_In_ LPCTSTR moduleName, _In_ LPCSTR functionName, _In_ void* pHookFunction, _Out_ void* pOriginalFunction);
 	~Hooker();
 
 	// Methods
 public:
 	bool initHook();
-	bool initByAddr();
 	bool insertHook();
+
 	bool unhook();
 	bool freeHook();
 
 	// Attributes
 public:
-	HMODULE m_hModule;
+	Hook	m_hook{};
 };
 

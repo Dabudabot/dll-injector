@@ -27,9 +27,6 @@
     <ClInclude Include="hooker_swarm.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="nativeapi.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="detour.h">
       <Filter>Header Files</Filter>
     </ClInclude>
