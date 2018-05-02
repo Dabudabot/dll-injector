@@ -1,7 +1,5 @@
 #pragma once
 #include "hooker.h"
-#include <vector>
-#include "detour.h"
 
 class HookerSwarm
 {
@@ -10,7 +8,7 @@ public:
 	bool initializeHooks();
 	bool deinitializeHooks();
 private:
-	bool initializeHook(_In_ LPCTSTR moduleName, _In_ LPCSTR functionName, _In_ void* pfnHook, _Out_ void* pfnOriginal);
+	void* initializeHook(_In_ LPCTSTR moduleName, _In_ LPCSTR functionName, _In_ void* pfnHook);
 
 	// Attributes
 public:

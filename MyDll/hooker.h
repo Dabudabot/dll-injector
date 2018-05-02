@@ -17,7 +17,7 @@ public:
 
 	// Constructors
 public:
-	Hooker(_In_ LPCTSTR moduleName, _In_ LPCSTR functionName, _In_ void* pHookFunction, _Out_ void* pOriginalFunction);
+	Hooker(_In_ LPCTSTR moduleName, _In_ LPCSTR functionName, _In_ void* pHookFunction);
 	~Hooker();
 
 	// Methods

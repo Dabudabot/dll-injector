@@ -1,13 +1,12 @@
 #include "stdafx.h"
 #include "hooker.h"
 
-
-Hooker::Hooker(const LPCTSTR moduleName, const LPCSTR functionName, void* pHookFunction, void* pOriginalFunction)
+Hooker::Hooker(const LPCTSTR moduleName, const LPCSTR functionName, void* pHookFunction)
 {
 	m_hook.m_moduleName = moduleName;
 	m_hook.m_functionName = functionName;
 	m_hook.m_pHookFunction = pHookFunction;
-	m_hook.m_pOriginalFunction = pOriginalFunction;
+	m_hook.m_pOriginalFunction = nullptr;
 	m_hook.m_isHooked = false;
 }
 
@@ -21,21 +20,30 @@ bool Hooker::initHook()
 	char opcodes[] = { 0x90, 0x90, 0x90, 0x90, 0x90, 0xe9, 0x00, 0x00, 0x00, 0x00 };
 
 	if (m_hook.m_isHooked) {
-		printf("function %s already hooked", m_hook.m_functionName);
+		wchar_t text[100];
+		wsprintf(text, L"Function %s already hooked", m_hook.m_functionName);
+		MessageBox(nullptr, text, L"MyDll.dll", MB_OK);
+		//printf("function %s already hooked", m_hook.m_functionName);
 		return false;
 	}
 
 	const auto hModule = GetModuleHandle(m_hook.m_moduleName);
 	if (nullptr == hModule) {
 		m_hook.m_isHooked = false;
-		printf("GetModuleHandle failed with: %lu", GetLastError());
+		wchar_t text[100];
+		wsprintf(text, L"GetModuleHandle failed with: %lu", GetLastError());
+		MessageBox(nullptr, text, L"MyDll.dll", MB_OK);
+		//printf("GetModuleHandle failed with: %lu", GetLastError());
 		return false;
 	}
 
 	m_hook.m_pOriginalFunction = GetProcAddress(hModule, m_hook.m_functionName);
 	if (nullptr == m_hook.m_pOriginalFunction) {
 		m_hook.m_isHooked = false;
-		printf("GetProcAddress failed with: %lu", GetLastError());
+		wchar_t text[100];
+		wsprintf(text, L"GetProcAddress failed with: %lu", GetLastError());
+		MessageBox(nullptr, text, L"MyDll.dll", MB_OK);
+		//printf("GetProcAddress failed with: %lu", GetLastError());
 		return false;
 	}
 
@@ -47,7 +55,10 @@ bool Hooker::initHook()
 	m_hook.m_pApiFunction = VirtualAlloc(nullptr, 4096, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
 
 	if (nullptr == m_hook.m_pApiFunction) {
-		printf("VirtualAlloc failed with: %lu", GetLastError());
+		wchar_t text[100];
+		wsprintf(text, L"VirtualAlloc failed with: %lu", GetLastError());
+		MessageBox(nullptr, text, L"MyDll.dll", MB_OK);
+		//printf("VirtualAlloc failed with: %lu", GetLastError());
 		return false;
 	}
 
