@@ -1,111 +1,29 @@
 #include "stdafx.h"
 #include "hooker.h"
 
-Hooker::Hooker(const LPCTSTR moduleName, const LPCSTR functionName, void* pHookFunction)
+void Hooker::initHook(const LPCTSTR moduleName, const LPCSTR functionName, LPVOID pNewFunction)
 {
-	m_hook.m_moduleName = moduleName;
-	m_hook.m_functionName = functionName;
-	m_hook.m_pHookFunction = pHookFunction;
-	m_hook.m_pOriginalFunction = nullptr;
-	m_hook.m_isHooked = false;
+	m_pOriginalFunction = GetProcAddress(GetModuleHandle(moduleName), functionName);
+
+	if (m_pOriginalFunction == nullptr)
+	{
+		MessageBox(nullptr, L"Original function is null", L"MyDll.dll", MB_OK);
+		return;
+	}
+
+	BYTE tempJmp[SIZE] = { 0xE9, 0x90, 0x90, 0x90, 0x90, 0xC3 };         // 0xE9 = JMP 0x90 = NOP 0xC3 = RET
+	memcpy(m_jmp, tempJmp, SIZE);                                        // store jmp instruction to JMP
+	auto jmpSize = (DWORD(pNewFunction) - DWORD(m_pOriginalFunction) - 5);  // calculate jump distance
+	VirtualProtect(LPVOID(m_pOriginalFunction), SIZE,                       // assign read write protection
+		PAGE_EXECUTE_READWRITE, &m_oldProtect);
+	memcpy(m_oldBytes, m_pOriginalFunction, SIZE);                            // make backup
+	memcpy(&m_jmp[1], &jmpSize, 4);                              // fill the nop's with the jump distance (JMP,distance(4bytes),RET)
+	memcpy(m_pOriginalFunction, m_jmp, SIZE);                                 // set jump instruction at the beginning of the original function
+	VirtualProtect(LPVOID(m_pOriginalFunction), SIZE, m_oldProtect, NULL);    // reset protection
 }
 
-
-Hooker::~Hooker()
+void Hooker::unhook() const
 {
-}
-
-bool Hooker::initHook()
-{
-	char opcodes[] = { 0x90, 0x90, 0x90, 0x90, 0x90, 0xe9, 0x00, 0x00, 0x00, 0x00 };
-
-	if (m_hook.m_isHooked) {
-		wchar_t text[100];
-		wsprintf(text, L"Function %s already hooked", m_hook.m_functionName);
-		MessageBox(nullptr, text, L"MyDll.dll", MB_OK);
-		//printf("function %s already hooked", m_hook.m_functionName);
-		return false;
-	}
-
-	const auto hModule = GetModuleHandle(m_hook.m_moduleName);
-	if (nullptr == hModule) {
-		m_hook.m_isHooked = false;
-		wchar_t text[100];
-		wsprintf(text, L"GetModuleHandle failed with: %lu", GetLastError());
-		MessageBox(nullptr, text, L"MyDll.dll", MB_OK);
-		//printf("GetModuleHandle failed with: %lu", GetLastError());
-		return false;
-	}
-
-	m_hook.m_pOriginalFunction = GetProcAddress(hModule, m_hook.m_functionName);
-	if (nullptr == m_hook.m_pOriginalFunction) {
-		m_hook.m_isHooked = false;
-		wchar_t text[100];
-		wsprintf(text, L"GetProcAddress failed with: %lu", GetLastError());
-		MessageBox(nullptr, text, L"MyDll.dll", MB_OK);
-		//printf("GetProcAddress failed with: %lu", GetLastError());
-		return false;
-	}
-
-	m_hook.m_jmp[0] = 0xe9;
-	*PULONG(&m_hook.m_jmp[1]) = ULONG(m_hook.m_pHookFunction) - ULONG(m_hook.m_pOriginalFunction) - 5;
-
-	memcpy(m_hook.m_apiBytes, m_hook.m_pOriginalFunction, 5);
-
-	m_hook.m_pApiFunction = VirtualAlloc(nullptr, 4096, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
-
-	if (nullptr == m_hook.m_pApiFunction) {
-		wchar_t text[100];
-		wsprintf(text, L"VirtualAlloc failed with: %lu", GetLastError());
-		MessageBox(nullptr, text, L"MyDll.dll", MB_OK);
-		//printf("VirtualAlloc failed with: %lu", GetLastError());
-		return false;
-	}
-
-	memcpy(m_hook.m_pApiFunction, m_hook.m_apiBytes, 5);
-
-	const auto origFunc = ULONG(m_hook.m_pApiFunction) + 5;
-	const auto funcAddr = ULONG(m_hook.m_pOriginalFunction) + 5;
-
-	*LPBYTE(LPBYTE(m_hook.m_pApiFunction) + 5) = 0xe9;
-	*PULONG(LPBYTE(m_hook.m_pApiFunction) + 6) = ULONG(funcAddr) - ULONG(origFunc) - 5;
-
-	m_hook.m_isHooked = true;
-	return true;
-}
-
-bool Hooker::insertHook()
-{
-	DWORD op;
-	if (!m_hook.m_isHooked) {  // NOLINT(readability-simplify-boolean-expr)
-		return false;
-	}
-	VirtualProtect(m_hook.m_pOriginalFunction, 5, PAGE_EXECUTE_READWRITE, &op);
-	memcpy(m_hook.m_pOriginalFunction, m_hook.m_jmp, 5);
-	VirtualProtect(m_hook.m_pOriginalFunction, 5, op, &op);
-	return true;
-}
-
-bool Hooker::unhook()
-{
-	DWORD op;
-	if (!m_hook.m_isHooked) {
-		return false;
-	}
-	VirtualProtect(m_hook.m_pOriginalFunction, 5, PAGE_EXECUTE_READWRITE, &op);
-	memcpy(m_hook.m_pOriginalFunction, m_hook.m_apiBytes, 5);
-	VirtualProtect(m_hook.m_pOriginalFunction, 5, op, &op);
-
-	m_hook.m_isHooked = false;
-	return true;
-}
-
-bool Hooker::freeHook()
-{
-	if (m_hook.m_isHooked) {
-		return false;
-	}
-	VirtualFree(m_hook.m_pApiFunction, 0, MEM_RELEASE);
-	return true;
+	memcpy(m_pOriginalFunction, m_oldBytes, SIZE);
 }
 

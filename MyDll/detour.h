@@ -1,8 +1,10 @@
 #pragma once
 #include "stdafx.h"
-namespace detour
+#include "hooker.h"
+
+namespace MyD3D11CreateDeviceAndSwapChain
 {
-	typedef HRESULT(WINAPI *pfn_D3D11CreateDeviceAndSwapChain)(
+	typedef HRESULT(WINAPI *pfn)(
 		_In_opt_        IDXGIAdapter         *pAdapter,
 		D3D_DRIVER_TYPE      DriverType,
 		HMODULE              Software,
@@ -17,9 +19,9 @@ namespace detour
 		_Out_opt_       ID3D11DeviceContext  **ppImmediateContext
 		);
 
-	pfn_D3D11CreateDeviceAndSwapChain pfnD3D11CreateDeviceAndSwapChain;
+	Hooker hooker;
 
-	HRESULT MyD3D11CreateDeviceAndSwapChain(
+	inline HRESULT MyFunction(
 		_In_opt_        IDXGIAdapter         *pAdapter,
 		D3D_DRIVER_TYPE      DriverType,
 		HMODULE              Software,
@@ -33,12 +35,19 @@ namespace detour
 		_Out_opt_       D3D_FEATURE_LEVEL    *pFeatureLevel,
 		_Out_opt_       ID3D11DeviceContext  **ppImmediateContext
 	) {
-		const auto result = pfnD3D11CreateDeviceAndSwapChain(pAdapter, DriverType, Software,
+		VirtualProtect(LPVOID(hooker.m_pOriginalFunction), SIZE, hooker.m_myProtect, nullptr);     // assign read write protection
+		memcpy(hooker.m_pOriginalFunction, hooker.m_oldBytes, SIZE);                            // restore backup
+		const auto retValue = ::D3D11CreateDeviceAndSwapChain(pAdapter, DriverType, Software,
 			Flags, pFeatureLevels, FeatureLevels, SDKVersion,
 			pSwapChainDesc, ppSwapChain, ppDevice,
-			pFeatureLevel, ppImmediateContext);
+			pFeatureLevel, ppImmediateContext);       // get return value of original function
+		memcpy(hooker.m_pOriginalFunction, hooker.m_jmp, SIZE);                                 // set the jump instruction again
+		VirtualProtect(LPVOID(hooker.m_pOriginalFunction), SIZE, hooker.m_oldProtect, nullptr);    // reset protection
+
+
+
 		MessageBox(nullptr, L"hook function called", L"MyDll.dll", MB_OK);
-		return result;
+		return retValue;                                                   // return original return value
 	}
 };
 

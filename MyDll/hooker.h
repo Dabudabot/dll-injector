@@ -1,35 +1,19 @@
 #pragma once
+
+#define SIZE 6
+
 class Hooker
 {
-	// Structs
-public:
-	struct Hook
-	{
-		LPCTSTR m_moduleName;
-		LPCSTR	m_functionName;
-		bool	m_isHooked;
-		void*	m_pOriginalFunction;
-		void*	m_pHookFunction;
-		char	m_jmp[6];
-		char	m_apiBytes[6];
-		void*	m_pApiFunction;
-	};
-
-	// Constructors
-public:
-	Hooker(_In_ LPCTSTR moduleName, _In_ LPCSTR functionName, _In_ void* pHookFunction);
-	~Hooker();
-
 	// Methods
 public:
-	bool initHook();
-	bool insertHook();
-
-	bool unhook();
-	bool freeHook();
+	void	initHook(_In_ LPCTSTR moduleName, _In_ LPCSTR functionName, LPVOID pNewFunction);
+	void	unhook() const;
 
 	// Attributes
 public:
-	Hook	m_hook{};
+	BYTE			m_jmp[SIZE] = { 0 };
+	BYTE			m_oldBytes[SIZE] = { 0 };
+	DWORD			m_oldProtect, m_myProtect = PAGE_EXECUTE_READWRITE;
+	LPVOID			m_pOriginalFunction;
 };
 
