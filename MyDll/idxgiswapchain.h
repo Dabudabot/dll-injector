@@ -1,14 +1,15 @@
 #pragma once
 
 #include <DXGI.h>
+#include "overlay.h"
 
 class MyIdxgiSwapChain : public IDXGISwapChain
 {
-public:
-	IDXGISwapChain* m_ppSwapChain = nullptr;
+	IDXGISwapChain* m_ppSwapChain_ = nullptr;
+	Overlay* m_overlay_ = nullptr;
 
 public:
-	explicit MyIdxgiSwapChain(IDXGISwapChain** ppSwapChain);
+	explicit MyIdxgiSwapChain(IDXGISwapChain** ppSwapChain, Overlay *overlay);
 
 	HRESULT STDMETHODCALLTYPE QueryInterface(
 		/* [in] */ REFIID riid,

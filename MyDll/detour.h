@@ -75,8 +75,12 @@ namespace MyD3D11CreateDeviceAndSwapChain
 		memcpy(hooker.m_pOriginalFunction, hooker.m_jmp, SIZE);											// set the jump instruction again
 		VirtualProtect(LPVOID(hooker.m_pOriginalFunction), SIZE, hooker.m_oldProtect, nullptr);			// reset protection
 
+		auto overlay = new Overlay;	//free it when swapchain releases
+
 		//redirecting pointer to present function
-		*ppSwapChain = new MyIdxgiSwapChain(&pSwapChain);	//TODO: will it leak?
+		*ppSwapChain = new MyIdxgiSwapChain(&pSwapChain, overlay);	//TODO: will it leak?
+
+		overlay->loadContent();
 
 		//wchar_t text[100];
 		//printf("ppSwapChain %p, myIdxgiSwapChain %p, pSwapChain %p, &pSwapChain %p", ppSwapChain, myIdxgiSwapChain, pSwapChain, &pSwapChain);

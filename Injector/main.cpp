@@ -13,7 +13,7 @@
 int _tmain(int argc, _TCHAR* argv[])
 {
 	//const auto appName = L"C:\\Windows\\SysWOW64\\notepad.exe";
-	const auto appName = L"C:\\Users\\Daulet\\source\\repos\\TriangleGreen\\x64\\Release\\TriangleGreen.exe";
+	const auto appName = L"C:\\Users\\Daulet\\source\\repos\\TriangleGreen2\\x64\\Release\\TriangleGreen.exe";
 	
 	InjectorFactory injectorFactory(appName);
 	auto injector = injectorFactory.getInjector();
