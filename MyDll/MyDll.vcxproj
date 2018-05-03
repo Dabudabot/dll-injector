@@ -150,12 +150,14 @@
   <ItemGroup>
     <ClInclude Include="detour.h" />
     <ClInclude Include="hooker.h" />
+    <ClInclude Include="idxgiswapchain.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="hooker.cpp" />
+    <ClCompile Include="idxgiswapchain.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
