@@ -21,39 +21,13 @@
     <ClInclude Include="targetver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="hooker.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="detour.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="idxgiswapchain.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="overlay.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="dllmain.cpp">
+    <ClCompile Include="RE-PEParser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="hooker.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="idxgiswapchain.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="overlay.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <FxCompile Include="ShaderRedColor.fx">
-      <Filter>Resource Files</Filter>
-    </FxCompile>
   </ItemGroup>
 </Project>
