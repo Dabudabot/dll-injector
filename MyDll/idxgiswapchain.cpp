@@ -1,3 +1,4 @@
+// idxgiswapchain.cpp : implementation of swapchain inteface
 #include "stdafx.h"
 #include "idxgiswapchain.h"
 
@@ -20,6 +21,7 @@ ULONG MyIdxgiSwapChain::AddRef()
 ULONG MyIdxgiSwapChain::Release()
 {
 	m_overlay_->unloadContent();
+	free(m_overlay_);
 	return m_ppSwapChain_->Release();
 }
 
@@ -51,7 +53,6 @@ HRESULT MyIdxgiSwapChain::GetDevice(REFIID riid, void ** ppDevice)
 HRESULT MyIdxgiSwapChain::Present(UINT SyncInterval, UINT Flags)
 {
 	m_overlay_->render();
-	free(m_overlay_);
 	//MessageBox(nullptr, L"Present function called", L"MyDll.dll", MB_OK);
 	return m_ppSwapChain_->Present(SyncInterval, Flags);
 }

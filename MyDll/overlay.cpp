@@ -1,3 +1,4 @@
+// overlay.cpp : implementation of overlay drawing
 #include "stdafx.h"
 #include "overlay.h"
 
@@ -6,6 +7,16 @@ struct Vertex
 {
 	XMFLOAT3 m_pos;
 };
+
+Overlay::Overlay(ID3D11Device** pDevice, ID3D11DeviceContext** pContext)
+{
+	m_pD3DDevice = *pDevice;
+	m_pD3DContext = *pContext;
+	m_pVsRedColor = nullptr;
+	m_pPsRedColor = nullptr;
+	m_pInputLayout = nullptr;
+	m_pVertexBuffer = nullptr;
+}
 
 bool Overlay::compileShader(const LPCWSTR szFilePath, const LPCSTR szFunc, const LPCSTR szShaderModel, ID3DBlob** buffer)
 {
@@ -34,9 +45,10 @@ bool Overlay::compileShader(const LPCWSTR szFilePath, const LPCSTR szFunc, const
 
 bool Overlay::loadContent()
 {
+	const auto shaderPath = L"C:\\Users\\Daulet\\source\\repos\\RE-S18\\RE-S18\\x64\\Debug\\ShaderRedColor.fx";
 	// Compile vertex shader
 	ID3DBlob* pVsBuffer = nullptr;
-	auto res = compileShader(L"ShaderRedColor.fx", "VS_Main", "vs_4_0", &pVsBuffer);
+	auto res = compileShader(shaderPath, "VS_Main", "vs_4_0", &pVsBuffer);
 	if (!res) {
 		MessageBox(nullptr, L"Unable to load vertex shader", L"ERROR MyDll.dll", MB_OK);
 		return false;
@@ -75,7 +87,7 @@ bool Overlay::loadContent()
 
 	// Compile pixel shader
 	ID3DBlob* pPsBuffer = nullptr;
-	res = compileShader(L"ShaderRedColor.fx", "PS_Main", "ps_4_0", &pPsBuffer);
+	res = compileShader(shaderPath, "PS_Main", "ps_4_0", &pPsBuffer);
 	if (res == false) {
 		MessageBox(nullptr, L"Unable to load pixel shader", L"ERROR MyDll.dll", MB_OK);
 		return false;

@@ -75,10 +75,10 @@ private:
 
 	// Attributes
 private:
-	BOOL						m_is86{};
-	PINJECTOR					m_injector;
-	STARTUPINFO					m_startupInfo{};
-	PROCESS_INFORMATION			m_processInfo{};
+	BOOL						m_is86_{};
+	PINJECTOR					m_injector_;
+	STARTUPINFO					m_startupInfo_{};
+	PROCESS_INFORMATION			m_processInfo_{};
 
 	//Operators
 public:
