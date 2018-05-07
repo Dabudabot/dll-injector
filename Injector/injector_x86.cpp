@@ -4,7 +4,7 @@
 
 Injector86::Injector86(const STARTUPINFO startupInfo, const PROCESS_INFORMATION processInfo) : Injector(startupInfo, processInfo)
 {
-	m_lpDllName = L"E:\\Documents\\Visual Studio 2017\\Projects\\RE-S18\\Debug\\MyDll.dll";	//path to DLL to be injected
+	m_lpDllName = L"C:\\Users\\Daulet\\source\\repos\\RE-S18\\RE-S18\\Debug\\MyDll.dll";	//path to DLL to be injected
 }
 
 bool Injector86::doInjection()

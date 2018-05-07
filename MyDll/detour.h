@@ -64,8 +64,6 @@ namespace MyD3D11CreateDeviceAndSwapChain
 		         _Out_opt_ D3D_FEATURE_LEVEL* pFeatureLevel,
 		         _Out_opt_ ID3D11DeviceContext** ppImmediateContext
 	) {
-		MessageBox(nullptr, L"hook function called 0", L"MyDll.dll", MB_OK);
-
 		IDXGISwapChain* pSwapChain = nullptr;
 
 		VirtualProtect(LPVOID(hooker.m_pOriginalFunction), SIZE, hooker.m_myProtect, nullptr);			// assign read write protection
@@ -83,12 +81,6 @@ namespace MyD3D11CreateDeviceAndSwapChain
 		*ppSwapChain = new MyIdxgiSwapChain(&pSwapChain, overlay);	//TODO: will it leak?
 
 		overlay->loadContent();
-
-		//wchar_t text[100];
-		//printf("ppSwapChain %p, myIdxgiSwapChain %p, pSwapChain %p, &pSwapChain %p", ppSwapChain, myIdxgiSwapChain, pSwapChain, &pSwapChain);
-		//wsprintf(text, L"ppSwapChain %p, myIdxgiSwapChain %p, pSwapChain %p, &pSwapChain %p", ppSwapChain, myIdxgiSwapChain, pSwapChain, &pSwapChain);
-		//MessageBox(nullptr, text, L"MyDll.dll", MB_OK);
-		MessageBox(nullptr, L"hook function called", L"MyDll.dll", MB_OK);
 		return retValue;																				// return original return value
 	}
 };

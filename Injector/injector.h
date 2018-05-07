@@ -1,11 +1,13 @@
+// injector.h : base injector 
+
 #pragma once
 class Injector  // NOLINT
 {
-	// typedefs
-public:
-
 	// structs
 public:
+	/**
+	 * \brief struct to hold function information adress and name
+	 */
 	struct FunctionContext
 	{
 		char* m_moduleName;
@@ -15,30 +17,124 @@ public:
 
 	// Constructors
 public:
+	/**
+	 * \brief ctor to init the injection
+	 * \param startupInfo default startup info
+	 * \param processInfo process to inject in
+	 */
 	Injector(STARTUPINFO startupInfo, PROCESS_INFORMATION processInfo);
+	/**
+	 * \brief default dtor
+	 */
 	virtual ~Injector() = default;
 
 	// Template functions
 public:
+	/**
+	 * \brief remote value to value
+	 * \tparam Type to cast in
+	 * \param base start addr
+	 * \param offset add to base this value
+	 * \return casted to Type value
+	 */
 	template<typename Type>		static Type			rvaToVa(_In_ DWORD_PTR base, _In_ DWORD offset);
+	/**
+	 * \brief remote value to remote value
+	 * \tparam Type to cast in
+	 * \param base start addr
+	 * \param offset add to base this value
+	 * \return pointer to addr
+	 */
 	template<typename Type>		static ULONG_PTR	rvaToRemoteVa(_In_ DWORD_PTR base, _In_ DWORD offset);
+	/**
+	 * \brief get image base from remote process
+	 * \tparam Peb x86 or x64 PEB struct
+	 * \param hProcess process from which to get image base
+	 * \param pRemoteImageBase achieved image base stored here
+	 * \return true in case of success
+	 */
 	template<typename Peb>		static bool			getRemoteImageBase(_In_ HANDLE hProcess, _Out_ ULONG_PTR* pRemoteImageBase);
+	/**
+	 * \brief searches for entry point in remote process
+	 * \tparam Headers 64 or 86 image header
+	 * \param hProcess process where to search
+	 * \param pRemoteImageBase image base of the remote process
+	 * \param pRemoteEntryPoint achieved entry point stored here
+	 * \return true in case of success
+	 */
 	template<typename Headers>	static bool			findRemoteEntryPoint(_In_ HANDLE hProcess, _In_ ULONG_PTR pRemoteImageBase, _Out_ ULONG_PTR* pRemoteEntryPoint);
+	/**
+	 * \brief searches for local PE header
+	 * \tparam Headers 64 or 86 image header
+	 * \param hProcess process where to search
+	 * \param base start addr
+	 * \return local PE header
+	 */
 	template<typename Headers>	static Headers*		findLocalPeHeader(_In_ HANDLE hProcess, _In_ ULONG_PTR base);
+	/**
+	 * \brief searches for loadLibrary
+	 * \tparam Headers 64 or 86 image header
+	 * \param hProcess process where to search
+	 * \param context function context (name, module, addr)
+	 * \return true in case of success
+	 */
 	template<typename Headers>	static bool			findRemoteLoadLibrary(_In_ HANDLE hProcess, _In_ FunctionContext* context);
+	/**
+	 * \brief searches for exports
+	 * \tparam Headers 64 or 86 image header
+	 * \param pRemoteModuleBase module base addr
+	 * \param hProcess process where to search
+	 * \param context function context (name, module, addr)
+	 * \return true if need to search more
+	 */
 	template<typename Headers>	static bool			findExport(_In_ ULONG_PTR pRemoteModuleBase, _In_ HANDLE hProcess, _In_ FunctionContext* context);
 
 	// Methods
 public:
+	/**
+	 * \brief list remote modules
+	 * \param hProcess remote process
+	 * \param pnModules achieved number modules here
+	 * \return modules
+	 */
 	static HMODULE*						getRemoteModules(_In_ HANDLE hProcess, _Out_ DWORD* pnModules);
+	/**
+	 * \brief ProcessBasicInformation is a home of PEB struct
+	 * \param hProcess remote process
+	 * \return ProcessBasicInformation struct
+	 */
 	static PROCESS_BASIC_INFORMATION	getProcessBasicInformation(_In_ HANDLE hProcess);
+	/**
+	 * \brief loops entry point of the remote process
+	 * \param hProcess remote process
+	 * \param hThread remote thread
+	 * \param remoteEntryPoint remote entry point which needed to be looped
+	 * \param originalEntryPointValue backup original values here
+	 * \return true in case of success
+	 */
 	static bool							loopEntryPoint(_In_ HANDLE hProcess, 
 														_In_ HANDLE hThread,
 														_In_ ULONG_PTR remoteEntryPoint, 
 														_Out_ WORD* originalEntryPointValue);
+	/**
+	 * \brief restores original values of the entry point
+	 * \param hProcess remote process
+	 * \param remoteEntryPoint remote entry point which was looped
+	 * \param originalEntryPointValue backup of the original values
+	 * \return true in case of success
+	 */
 	static bool							deLoopEntryPoint(_In_ HANDLE hProcess,
 														_In_ ULONG_PTR remoteEntryPoint,
 														_In_ WORD* originalEntryPointValue);
+	/**
+	 * \brief injects dll into the remote process by patching it with shellcode
+	 * \param hProcess remote process
+	 * \param lpDllName dll which is going to be injected
+	 * \param shellcode patch
+	 * \param szShellcode size of patch
+	 * \param context function to be patched
+	 * \return true in case of success
+	 */
 	static bool							inject(_In_ HANDLE hProcess, 
 												_In_ LPCTSTR lpDllName,
 												_In_ const UCHAR* shellcode,
@@ -48,6 +144,10 @@ public:
 
 	// Overrides
 public:
+	/**
+	 * \brief injection specific algorithm here
+	 * \return true in case of success
+	 */
 	virtual bool					doInjection() = 0;
 	
 	// Attributes
@@ -117,10 +217,10 @@ template <typename Headers>
 Headers* Injector::findLocalPeHeader(const HANDLE hProcess, const ULONG_PTR base)
 {
 	const auto pLocalDosHeader = Remote::copyRemoteDataType<IMAGE_DOS_HEADER>(hProcess, base);
-	const auto e_lfanew = pLocalDosHeader->e_lfanew;
+	const auto eLfanew = pLocalDosHeader->e_lfanew;
 	free(pLocalDosHeader);
 
-	const auto pRemotePeHeader = rvaToRemoteVa<Headers*>(base, e_lfanew);
+	const auto pRemotePeHeader = rvaToRemoteVa<Headers*>(base, eLfanew);
 	const auto localPeHeader = Remote::copyRemoteDataType<Headers>(hProcess, pRemotePeHeader);
 
 	return localPeHeader;

@@ -1,16 +1,25 @@
+// My replacement of the swapchain inteface
 #pragma once
 
 #include <DXGI.h>
 #include "overlay.h"
 
-class MyIdxgiSwapChain : public IDXGISwapChain
+class MyIdxgiSwapChain : public IDXGISwapChain  // NOLINT(cppcoreguidelines-special-member-functions, hicpp-special-member-functions)
 {
 	IDXGISwapChain* m_ppSwapChain_ = nullptr;
 	Overlay* m_overlay_ = nullptr;
 
 public:
+	virtual ~MyIdxgiSwapChain() = default;
+	/**
+	 * \brief ctor to init original swapchain and overlay
+	 * \param ppSwapChain original one
+	 * \param overlay to draw smt on
+	 */
 	explicit MyIdxgiSwapChain(IDXGISwapChain** ppSwapChain, Overlay *overlay);
 
+	// Original functions
+public:
 	HRESULT STDMETHODCALLTYPE QueryInterface(
 		/* [in] */ REFIID riid,
 		/* [iid_is][out] */ _COM_Outptr_ void __RPC_FAR *__RPC_FAR *ppvObject) override;
