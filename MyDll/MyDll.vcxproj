@@ -157,6 +157,9 @@
   <ItemGroup>
     <ClInclude Include="detour.h" />
     <ClInclude Include="hooker.h" />
+    <ClInclude Include="id3d11device.h" />
+    <ClInclude Include="idxgifactory.h" />
+    <ClInclude Include="idxgifactory1.h" />
     <ClInclude Include="idxgiswapchain.h" />
     <ClInclude Include="overlay.h" />
     <ClInclude Include="stdafx.h" />
@@ -165,6 +168,9 @@
   <ItemGroup>
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="hooker.cpp" />
+    <ClCompile Include="id3d11device.cpp" />
+    <ClCompile Include="idxgifactory.cpp" />
+    <ClCompile Include="idxgifactory1.cpp" />
     <ClCompile Include="idxgiswapchain.cpp" />
     <ClCompile Include="overlay.cpp" />
     <ClCompile Include="stdafx.cpp">

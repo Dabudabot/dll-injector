@@ -33,6 +33,15 @@
     <ClInclude Include="overlay.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="id3d11device.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="idxgifactory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="idxgifactory1.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -48,6 +57,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="overlay.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="id3d11device.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="idxgifactory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="idxgifactory1.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
