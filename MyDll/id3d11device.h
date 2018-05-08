@@ -4,6 +4,15 @@
 class MyID3D11Device : public ID3D11Device
 {
 	ID3D11Device* m_pDevice_ = nullptr;
+	MyID3D11Device1* m_pDevice1_ = nullptr;
+	MyID3D11Device2* m_pDevice2_ = nullptr;
+	MyID3D11Device3* m_pDevice3_ = nullptr;
+	MyID3D11Device4* m_pDevice4_ = nullptr;
+	MyID3D11Device5* m_pDevice5_ = nullptr;
+
+	MyIDXGIDevice* m_pIdxgiDevice_ = nullptr;
+	MyIDXGIDevice1* m_pIdxgiDevice1_ = nullptr;
+	MyIDXGIDevice2* m_pIdxgiDevice2_ = nullptr;
 
 public:
 	Overlay * m_overlay = nullptr;

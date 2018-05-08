@@ -53,7 +53,6 @@ HRESULT MyIdxgiSwapChain::GetDevice(REFIID riid, void ** ppDevice)
 HRESULT MyIdxgiSwapChain::Present(UINT SyncInterval, UINT Flags)
 {
 	m_overlay_->render();
-	//MessageBox(nullptr, L"Present function called", L"MyDll.dll", MB_OK);
 	return m_ppSwapChain_->Present(SyncInterval, Flags);
 }
 

@@ -1,7 +1,7 @@
 #pragma once
 class MyIDXGIFactory1 : public IDXGIFactory1
 {
-	void* m_pFactory_ = nullptr;
+	IDXGIFactory1* m_pFactory_ = nullptr;
 
 public:
 	MyIDXGIFactory1(void** ppFactory);
