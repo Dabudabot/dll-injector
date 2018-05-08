@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\MyInterfaces">
+      <UniqueIdentifier>{399bcaef-3757-4055-8fa4-e10670119504}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\MyInterfacesImpl">
+      <UniqueIdentifier>{e8245cb8-225b-4855-9c09-b4f51e135bea}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -27,20 +33,23 @@
     <ClInclude Include="detour.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="idxgiswapchain.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="overlay.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="id3d11device.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\MyInterfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="idxgiadapter.h">
+      <Filter>Header Files\MyInterfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="idxgidevice.h">
+      <Filter>Header Files\MyInterfaces</Filter>
     </ClInclude>
     <ClInclude Include="idxgifactory.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\MyInterfaces</Filter>
     </ClInclude>
-    <ClInclude Include="idxgifactory1.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="idxgiswapchain.h">
+      <Filter>Header Files\MyInterfaces</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -53,20 +62,23 @@
     <ClCompile Include="hooker.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="idxgiswapchain.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="overlay.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="id3d11device.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\MyInterfacesImpl</Filter>
+    </ClCompile>
+    <ClCompile Include="idxgiadapter.cpp">
+      <Filter>Source Files\MyInterfacesImpl</Filter>
+    </ClCompile>
+    <ClCompile Include="idxgidevice.cpp">
+      <Filter>Source Files\MyInterfacesImpl</Filter>
     </ClCompile>
     <ClCompile Include="idxgifactory.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\MyInterfacesImpl</Filter>
     </ClCompile>
-    <ClCompile Include="idxgifactory1.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="idxgiswapchain.cpp">
+      <Filter>Source Files\MyInterfacesImpl</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

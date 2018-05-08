@@ -1,10 +1,9 @@
 #include "stdafx.h"
 #include "id3d11device.h"
 
-
 MyID3D11Device::MyID3D11Device(ID3D11Device** ppDevice, Overlay *overlay)
 {
-	m_pDevice_ = *ppDevice;
+	m_pDevice_ = static_cast<ID3D11Device5*>(*ppDevice);
 	m_overlay = overlay;
 }
 
@@ -12,45 +11,21 @@ HRESULT MyID3D11Device::QueryInterface(const IID& riid, void** ppvObject)
 {
 	const auto result = m_pDevice_->QueryInterface(riid, ppvObject);
 
-	if (riid == __uuidof(ID3D11Device1))
+	if (riid == __uuidof(ID3D11Device1) || 
+		riid == __uuidof(ID3D11Device2) ||
+		riid == __uuidof(ID3D11Device3) ||
+		riid == __uuidof(ID3D11Device4) ||
+		riid == __uuidof(ID3D11Device5))
 	{
-		m_pDevice1_ = new MyID3D11Device1(ppvObject, m_overlay);
-		ppvObject = m_pDevice1_;
-	} 
-	else if (riid == __uuidof(ID3D11Device2))
-	{
-		m_pDevice2_ = new MyID3D11Device2(ppvObject, m_overlay);
-		ppvObject = m_pDevice2_;
+		ppvObject = reinterpret_cast<void**>(&m_pDevice_);
 	}
-	else if (riid == __uuidof(ID3D11Device3))
+	else if (riid == __uuidof(IDXGIDevice)	||
+			 riid == __uuidof(IDXGIDevice1)	||
+			 riid == __uuidof(IDXGIDevice2))
 	{
-		m_pDevice3_ = new MyID3D11Device3(ppvObject, m_overlay);
-		ppvObject = m_pDevice3_;
-	}
-	else if (riid == __uuidof(ID3D11Device4))
-	{
-		m_pDevice4_ = new MyID3D11Device4(ppvObject, m_overlay);
-		ppvObject = m_pDevice4_;
-	}
-	else if (riid == __uuidof(ID3D11Device5))
-	{
-		m_pDevice5_ = new MyID3D11Device5(ppvObject, m_overlay);
-		ppvObject = m_pDevice5_;
-	}
-	else if (riid == __uuidof(IDXGIDevice))
-	{
-		m_pIdxgiDevice_ = new MyIDXGIDevice(ppvObject, m_overlay);
-		ppvObject = m_pIdxgiDevice_;
-	}
-	else if (riid == __uuidof(IDXGIDevice1))
-	{
-		m_pIdxgiDevice1_ = new MyIDXGIDevice1(ppvObject, m_overlay);
-		ppvObject = m_pIdxgiDevice1_;
-	}
-	else if (riid == __uuidof(IDXGIDevice2))
-	{
-		m_pIdxgiDevice2_ = new MyIDXGIDevice2(ppvObject, m_overlay);
-		ppvObject = m_pIdxgiDevice2_;
+		auto device = static_cast<IDXGIDevice2*>(*ppvObject);
+		m_pIdxgiDevice_ = new MyIDXGIDevice(&device);
+		ppvObject = reinterpret_cast<void**>(&m_pIdxgiDevice_);
 	}
 
 	return result;
@@ -63,7 +38,7 @@ ULONG MyID3D11Device::AddRef()
 
 ULONG MyID3D11Device::Release()
 {
-	//TODO i need this
+	free(m_pIdxgiDevice_);
 	return m_pDevice_->Release();
 }
 
@@ -289,5 +264,159 @@ HRESULT MyID3D11Device::SetExceptionMode(UINT RaiseFlags)
 UINT MyID3D11Device::GetExceptionMode()
 {
 	return m_pDevice_->GetExceptionMode();
+}
+
+void MyID3D11Device::GetImmediateContext1(ID3D11DeviceContext1** ppImmediateContext)
+{
+	return m_pDevice_->GetImmediateContext1(ppImmediateContext);
+}
+
+HRESULT MyID3D11Device::CreateDeferredContext1(UINT ContextFlags, ID3D11DeviceContext1** ppDeferredContext)
+{
+	return m_pDevice_->CreateDeferredContext1(ContextFlags, ppDeferredContext);
+}
+
+HRESULT MyID3D11Device::CreateBlendState1(const D3D11_BLEND_DESC1* pBlendStateDesc, ID3D11BlendState1** ppBlendState)
+{
+	return m_pDevice_->CreateBlendState1(pBlendStateDesc, ppBlendState);
+}
+
+HRESULT MyID3D11Device::CreateRasterizerState1(const D3D11_RASTERIZER_DESC1* pRasterizerDesc,
+	ID3D11RasterizerState1** ppRasterizerState)
+{
+	return m_pDevice_->CreateRasterizerState1(pRasterizerDesc, ppRasterizerState);
+}
+
+HRESULT MyID3D11Device::CreateDeviceContextState(UINT Flags, const D3D_FEATURE_LEVEL* pFeatureLevels,
+	UINT FeatureLevels, UINT SDKVersion, const IID& EmulatedInterface, D3D_FEATURE_LEVEL* pChosenFeatureLevel,
+	ID3DDeviceContextState** ppContextState)
+{
+	return m_pDevice_->CreateDeviceContextState(Flags, pFeatureLevels, FeatureLevels, SDKVersion, EmulatedInterface, pChosenFeatureLevel, ppContextState);
+}
+
+HRESULT MyID3D11Device::OpenSharedResource1(HANDLE hResource, const IID& returnedInterface, void** ppResource)
+{
+	return m_pDevice_->OpenSharedResource1(hResource, returnedInterface, ppResource);
+}
+
+HRESULT MyID3D11Device::OpenSharedResourceByName(LPCWSTR lpName, DWORD dwDesiredAccess, const IID& returnedInterface,
+	void** ppResource)
+{
+	return m_pDevice_->OpenSharedResourceByName(lpName, dwDesiredAccess, returnedInterface, ppResource);
+}
+
+void MyID3D11Device::GetImmediateContext2(ID3D11DeviceContext2** ppImmediateContext)
+{
+	return m_pDevice_->GetImmediateContext2(ppImmediateContext);
+}
+
+HRESULT MyID3D11Device::CreateDeferredContext2(UINT ContextFlags, ID3D11DeviceContext2** ppDeferredContext)
+{
+	return m_pDevice_->CreateDeferredContext2(ContextFlags, ppDeferredContext);
+}
+
+void MyID3D11Device::GetResourceTiling(ID3D11Resource* pTiledResource, UINT* pNumTilesForEntireResource,
+	D3D11_PACKED_MIP_DESC* pPackedMipDesc, D3D11_TILE_SHAPE* pStandardTileShapeForNonPackedMips,
+	UINT* pNumSubresourceTilings, UINT FirstSubresourceTilingToGet,
+	D3D11_SUBRESOURCE_TILING* pSubresourceTilingsForNonPackedMips)
+{
+	return m_pDevice_->GetResourceTiling(pTiledResource, pNumTilesForEntireResource,
+		pPackedMipDesc, pStandardTileShapeForNonPackedMips,
+		pNumSubresourceTilings, FirstSubresourceTilingToGet,
+		pSubresourceTilingsForNonPackedMips);
+}
+
+HRESULT MyID3D11Device::CheckMultisampleQualityLevels1(DXGI_FORMAT Format, UINT SampleCount, UINT Flags,
+	UINT* pNumQualityLevels)
+{
+	return m_pDevice_->CheckMultisampleQualityLevels1(Format, SampleCount, Flags,
+		pNumQualityLevels);
+}
+
+HRESULT MyID3D11Device::CreateTexture2D1(const D3D11_TEXTURE2D_DESC1* pDesc1,
+	const D3D11_SUBRESOURCE_DATA* pInitialData, ID3D11Texture2D1** ppTexture2D)
+{
+	return m_pDevice_->CreateTexture2D1(pDesc1, pInitialData, ppTexture2D);
+}
+
+HRESULT MyID3D11Device::CreateTexture3D1(const D3D11_TEXTURE3D_DESC1* pDesc1,
+	const D3D11_SUBRESOURCE_DATA* pInitialData, ID3D11Texture3D1** ppTexture3D)
+{
+	return m_pDevice_->CreateTexture3D1(pDesc1, pInitialData, ppTexture3D);
+}
+
+HRESULT MyID3D11Device::CreateRasterizerState2(const D3D11_RASTERIZER_DESC2* pRasterizerDesc,
+	ID3D11RasterizerState2** ppRasterizerState)
+{
+	return m_pDevice_->CreateRasterizerState2(pRasterizerDesc, ppRasterizerState);
+}
+
+HRESULT MyID3D11Device::CreateShaderResourceView1(ID3D11Resource* pResource,
+	const D3D11_SHADER_RESOURCE_VIEW_DESC1* pDesc1, ID3D11ShaderResourceView1** ppSRView1)
+{
+	return m_pDevice_->CreateShaderResourceView1(pResource, pDesc1, ppSRView1);
+}
+
+HRESULT MyID3D11Device::CreateUnorderedAccessView1(ID3D11Resource* pResource,
+	const D3D11_UNORDERED_ACCESS_VIEW_DESC1* pDesc1, ID3D11UnorderedAccessView1** ppUAView1)
+{
+	return m_pDevice_->CreateUnorderedAccessView1(pResource, pDesc1, ppUAView1);
+}
+
+HRESULT MyID3D11Device::CreateRenderTargetView1(ID3D11Resource* pResource, const D3D11_RENDER_TARGET_VIEW_DESC1* pDesc1,
+	ID3D11RenderTargetView1** ppRTView1)
+{
+	return m_pDevice_->CreateRenderTargetView1(pResource, pDesc1, ppRTView1);
+}
+
+HRESULT MyID3D11Device::CreateQuery1(const D3D11_QUERY_DESC1* pQueryDesc1, ID3D11Query1** ppQuery1)
+{
+	return m_pDevice_->CreateQuery1(pQueryDesc1, ppQuery1);
+}
+
+void MyID3D11Device::GetImmediateContext3(ID3D11DeviceContext3** ppImmediateContext)
+{
+	return m_pDevice_->GetImmediateContext3(ppImmediateContext);
+}
+
+HRESULT MyID3D11Device::CreateDeferredContext3(UINT ContextFlags, ID3D11DeviceContext3** ppDeferredContext)
+{
+	return m_pDevice_->CreateDeferredContext3(ContextFlags, ppDeferredContext);
+}
+
+void MyID3D11Device::WriteToSubresource(ID3D11Resource* pDstResource, UINT DstSubresource, const D3D11_BOX* pDstBox,
+	const void* pSrcData, UINT SrcRowPitch, UINT SrcDepthPitch)
+{
+	return m_pDevice_->WriteToSubresource(pDstResource, DstSubresource, pDstBox,
+		 pSrcData, SrcRowPitch, SrcDepthPitch);
+}
+
+void MyID3D11Device::ReadFromSubresource(void* pDstData, UINT DstRowPitch, UINT DstDepthPitch,
+	ID3D11Resource* pSrcResource, UINT SrcSubresource, const D3D11_BOX* pSrcBox)
+{
+	return m_pDevice_->ReadFromSubresource(pDstData, DstRowPitch, DstDepthPitch,
+		pSrcResource, SrcSubresource, pSrcBox);
+}
+
+HRESULT MyID3D11Device::RegisterDeviceRemovedEvent(HANDLE hEvent, DWORD* pdwCookie)
+{
+	return m_pDevice_->RegisterDeviceRemovedEvent(hEvent, pdwCookie);
+}
+
+void MyID3D11Device::UnregisterDeviceRemoved(DWORD dwCookie)
+{
+	return m_pDevice_->UnregisterDeviceRemoved(dwCookie);
+}
+
+HRESULT MyID3D11Device::OpenSharedFence(HANDLE hFence, const IID& ReturnedInterface, void** ppFence)
+{
+	return m_pDevice_->OpenSharedFence(hFence, ReturnedInterface, ppFence);
+}
+
+HRESULT MyID3D11Device::CreateFence(UINT64 InitialValue, D3D11_FENCE_FLAG Flags, const IID& ReturnedInterface,
+	void** ppFence)
+{
+	return m_pDevice_->CreateFence(InitialValue, Flags, ReturnedInterface,
+		ppFence);
 }
 

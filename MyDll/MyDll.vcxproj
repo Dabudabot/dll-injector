@@ -77,8 +77,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(DXSDK_DIR)Include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(DXSDK_DIR)Lib\x64;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(IncludePath);$(DXSDK_DIR)Include</IncludePath>
+    <LibraryPath>$(LibraryPath);$(DXSDK_DIR)Lib\x64</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -158,8 +158,9 @@
     <ClInclude Include="detour.h" />
     <ClInclude Include="hooker.h" />
     <ClInclude Include="id3d11device.h" />
+    <ClInclude Include="idxgiadapter.h" />
+    <ClInclude Include="idxgidevice.h" />
     <ClInclude Include="idxgifactory.h" />
-    <ClInclude Include="idxgifactory1.h" />
     <ClInclude Include="idxgiswapchain.h" />
     <ClInclude Include="overlay.h" />
     <ClInclude Include="stdafx.h" />
@@ -169,8 +170,9 @@
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="hooker.cpp" />
     <ClCompile Include="id3d11device.cpp" />
+    <ClCompile Include="idxgiadapter.cpp" />
+    <ClCompile Include="idxgidevice.cpp" />
     <ClCompile Include="idxgifactory.cpp" />
-    <ClCompile Include="idxgifactory1.cpp" />
     <ClCompile Include="idxgiswapchain.cpp" />
     <ClCompile Include="overlay.cpp" />
     <ClCompile Include="stdafx.cpp">

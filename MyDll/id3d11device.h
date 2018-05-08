@@ -1,18 +1,11 @@
 #pragma once
 #include "overlay.h"
+#include "idxgidevice.h"
 
-class MyID3D11Device : public ID3D11Device
+class MyID3D11Device : public ID3D11Device5
 {
-	ID3D11Device* m_pDevice_ = nullptr;
-	MyID3D11Device1* m_pDevice1_ = nullptr;
-	MyID3D11Device2* m_pDevice2_ = nullptr;
-	MyID3D11Device3* m_pDevice3_ = nullptr;
-	MyID3D11Device4* m_pDevice4_ = nullptr;
-	MyID3D11Device5* m_pDevice5_ = nullptr;
-
+	ID3D11Device5* m_pDevice_ = nullptr;
 	MyIDXGIDevice* m_pIdxgiDevice_ = nullptr;
-	MyIDXGIDevice1* m_pIdxgiDevice1_ = nullptr;
-	MyIDXGIDevice2* m_pIdxgiDevice2_ = nullptr;
 
 public:
 	Overlay * m_overlay = nullptr;
@@ -83,5 +76,48 @@ public:
 	void GetImmediateContext(ID3D11DeviceContext** ppImmediateContext) override;
 	HRESULT SetExceptionMode(UINT RaiseFlags) override;
 	UINT GetExceptionMode() override;
+	void GetImmediateContext1(ID3D11DeviceContext1** ppImmediateContext) override;
+	HRESULT CreateDeferredContext1(UINT ContextFlags, ID3D11DeviceContext1** ppDeferredContext) override;
+	HRESULT CreateBlendState1(const D3D11_BLEND_DESC1* pBlendStateDesc, ID3D11BlendState1** ppBlendState) override;
+	HRESULT CreateRasterizerState1(const D3D11_RASTERIZER_DESC1* pRasterizerDesc,
+		ID3D11RasterizerState1** ppRasterizerState) override;
+	HRESULT CreateDeviceContextState(UINT Flags, const D3D_FEATURE_LEVEL* pFeatureLevels, UINT FeatureLevels,
+		UINT SDKVersion, const IID& EmulatedInterface, D3D_FEATURE_LEVEL* pChosenFeatureLevel,
+		ID3DDeviceContextState** ppContextState) override;
+	HRESULT OpenSharedResource1(HANDLE hResource, const IID& returnedInterface, void** ppResource) override;
+	HRESULT OpenSharedResourceByName(LPCWSTR lpName, DWORD dwDesiredAccess, const IID& returnedInterface,
+		void** ppResource) override;
+	void GetImmediateContext2(ID3D11DeviceContext2** ppImmediateContext) override;
+	HRESULT CreateDeferredContext2(UINT ContextFlags, ID3D11DeviceContext2** ppDeferredContext) override;
+	void GetResourceTiling(ID3D11Resource* pTiledResource, UINT* pNumTilesForEntireResource,
+		D3D11_PACKED_MIP_DESC* pPackedMipDesc, D3D11_TILE_SHAPE* pStandardTileShapeForNonPackedMips,
+		UINT* pNumSubresourceTilings, UINT FirstSubresourceTilingToGet,
+		D3D11_SUBRESOURCE_TILING* pSubresourceTilingsForNonPackedMips) override;
+	HRESULT CheckMultisampleQualityLevels1(DXGI_FORMAT Format, UINT SampleCount, UINT Flags, UINT* pNumQualityLevels)
+	override;
+	HRESULT CreateTexture2D1(const D3D11_TEXTURE2D_DESC1* pDesc1, const D3D11_SUBRESOURCE_DATA* pInitialData,
+		ID3D11Texture2D1** ppTexture2D) override;
+	HRESULT CreateTexture3D1(const D3D11_TEXTURE3D_DESC1* pDesc1, const D3D11_SUBRESOURCE_DATA* pInitialData,
+		ID3D11Texture3D1** ppTexture3D) override;
+	HRESULT CreateRasterizerState2(const D3D11_RASTERIZER_DESC2* pRasterizerDesc,
+		ID3D11RasterizerState2** ppRasterizerState) override;
+	HRESULT CreateShaderResourceView1(ID3D11Resource* pResource, const D3D11_SHADER_RESOURCE_VIEW_DESC1* pDesc1,
+		ID3D11ShaderResourceView1** ppSRView1) override;
+	HRESULT CreateUnorderedAccessView1(ID3D11Resource* pResource, const D3D11_UNORDERED_ACCESS_VIEW_DESC1* pDesc1,
+		ID3D11UnorderedAccessView1** ppUAView1) override;
+	HRESULT CreateRenderTargetView1(ID3D11Resource* pResource, const D3D11_RENDER_TARGET_VIEW_DESC1* pDesc1,
+		ID3D11RenderTargetView1** ppRTView1) override;
+	HRESULT CreateQuery1(const D3D11_QUERY_DESC1* pQueryDesc1, ID3D11Query1** ppQuery1) override;
+	void GetImmediateContext3(ID3D11DeviceContext3** ppImmediateContext) override;
+	HRESULT CreateDeferredContext3(UINT ContextFlags, ID3D11DeviceContext3** ppDeferredContext) override;
+	void WriteToSubresource(ID3D11Resource* pDstResource, UINT DstSubresource, const D3D11_BOX* pDstBox,
+		const void* pSrcData, UINT SrcRowPitch, UINT SrcDepthPitch) override;
+	void ReadFromSubresource(void* pDstData, UINT DstRowPitch, UINT DstDepthPitch, ID3D11Resource* pSrcResource,
+		UINT SrcSubresource, const D3D11_BOX* pSrcBox) override;
+	HRESULT RegisterDeviceRemovedEvent(HANDLE hEvent, DWORD* pdwCookie) override;
+	void UnregisterDeviceRemoved(DWORD dwCookie) override;
+	HRESULT OpenSharedFence(HANDLE hFence, const IID& ReturnedInterface, void** ppFence) override;
+	HRESULT CreateFence(UINT64 InitialValue, D3D11_FENCE_FLAG Flags, const IID& ReturnedInterface, void** ppFence)
+	override;
 };
 

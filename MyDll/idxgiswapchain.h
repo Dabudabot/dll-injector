@@ -1,112 +1,65 @@
 // My replacement of the swapchain inteface
 #pragma once
 
-#include <DXGI.h>
 #include "overlay.h"
 
-class MyIdxgiSwapChain : public IDXGISwapChain  // NOLINT(cppcoreguidelines-special-member-functions, hicpp-special-member-functions)
+class MyIdxgiSwapChain : public IDXGISwapChain4
 {
-	IDXGISwapChain* m_ppSwapChain_ = nullptr;
+	IDXGISwapChain4* m_ppSwapChain_ = nullptr;
 	Overlay* m_overlay_ = nullptr;
 
 public:
-	virtual ~MyIdxgiSwapChain() = default;
+	~MyIdxgiSwapChain() = default;
 	/**
 	 * \brief ctor to init original swapchain and overlay
 	 * \param ppSwapChain original one
 	 * \param overlay to draw smt on
 	 */
 	explicit MyIdxgiSwapChain(IDXGISwapChain** ppSwapChain, Overlay *overlay);
+	explicit MyIdxgiSwapChain(IDXGISwapChain1** ppSwapChain, Overlay *overlay);
 
 	// Original functions
 public:
-	HRESULT STDMETHODCALLTYPE QueryInterface(
-		/* [in] */ REFIID riid,
-		/* [iid_is][out] */ _COM_Outptr_ void __RPC_FAR *__RPC_FAR *ppvObject) override;
-
-	ULONG STDMETHODCALLTYPE AddRef(void) override;
-
-	ULONG STDMETHODCALLTYPE Release(void) override;
-
-	HRESULT STDMETHODCALLTYPE SetPrivateData(
-		/* [annotation][in] */
-		__in  REFGUID Name,
-		/* [in] */ UINT DataSize,
-		/* [annotation][in] */
-		__in_bcount(DataSize)  const void *pData) override;
-
-	HRESULT STDMETHODCALLTYPE SetPrivateDataInterface(
-		/* [annotation][in] */
-		__in  REFGUID Name,
-		/* [annotation][in] */
-		__in  const IUnknown *pUnknown) override;
-
-	HRESULT STDMETHODCALLTYPE GetPrivateData(
-		/* [annotation][in] */
-		__in  REFGUID Name,
-		/* [annotation][out][in] */
-		__inout  UINT *pDataSize,
-		/* [annotation][out] */
-		__out_bcount(*pDataSize)  void *pData) override;
-
-	HRESULT STDMETHODCALLTYPE GetParent(
-		/* [annotation][in] */
-		__in  REFIID riid,
-		/* [annotation][retval][out] */
-		__out  void **ppParent) override;
-
-	HRESULT STDMETHODCALLTYPE GetDevice(
-		/* [annotation][in] */
-		__in  REFIID riid,
-		/* [annotation][retval][out] */
-		__out  void **ppDevice) override;
-
-	HRESULT STDMETHODCALLTYPE Present(
-		/* [in] */ UINT SyncInterval,
-		/* [in] */ UINT Flags) override;
-
-	HRESULT STDMETHODCALLTYPE GetBuffer(
-		/* [in] */ UINT Buffer,
-		/* [annotation][in] */
-		__in  REFIID riid,
-		/* [annotation][out][in] */
-		__out  void **ppSurface) override;
-
-	HRESULT STDMETHODCALLTYPE SetFullscreenState(
-		/* [in] */ BOOL Fullscreen,
-		/* [annotation][in] */
-		__in_opt  IDXGIOutput *pTarget) override;
-
-	HRESULT STDMETHODCALLTYPE GetFullscreenState(
-		/* [annotation][out] */
-		__out  BOOL *pFullscreen,
-		/* [annotation][out] */
-		__out  IDXGIOutput **ppTarget) override;
-
-	HRESULT STDMETHODCALLTYPE GetDesc(
-		/* [annotation][out] */
-		__out  DXGI_SWAP_CHAIN_DESC *pDesc) override;
-
-	HRESULT STDMETHODCALLTYPE ResizeBuffers(
-		/* [in] */ UINT BufferCount,
-		/* [in] */ UINT Width,
-		/* [in] */ UINT Height,
-		/* [in] */ DXGI_FORMAT NewFormat,
-		/* [in] */ UINT SwapChainFlags) override;
-
-	HRESULT STDMETHODCALLTYPE ResizeTarget(
-		/* [annotation][in] */
-		__in  const DXGI_MODE_DESC *pNewTargetParameters) override;
-
-	HRESULT STDMETHODCALLTYPE GetContainingOutput(
-		/* [annotation][out] */
-		__out  IDXGIOutput **ppOutput) override;
-
-	HRESULT STDMETHODCALLTYPE GetFrameStatistics(
-		/* [annotation][out] */
-		__out  DXGI_FRAME_STATISTICS *pStats) override;
-
-	HRESULT STDMETHODCALLTYPE GetLastPresentCount(
-		/* [annotation][out] */
-		__out  UINT *pLastPresentCount) override;
+	HRESULT QueryInterface(const IID& riid, void** ppvObject) override;
+	ULONG AddRef() override;
+	ULONG Release() override;
+	HRESULT SetPrivateData(const GUID& Name, UINT DataSize, const void* pData) override;
+	HRESULT SetPrivateDataInterface(const GUID& Name, const IUnknown* pUnknown) override;
+	HRESULT GetPrivateData(const GUID& Name, UINT* pDataSize, void* pData) override;
+	HRESULT GetParent(const IID& riid, void** ppParent) override;
+	HRESULT GetDevice(const IID& riid, void** ppDevice) override;
+	HRESULT Present(UINT SyncInterval, UINT Flags) override;
+	HRESULT GetBuffer(UINT Buffer, const IID& riid, void** ppSurface) override;
+	HRESULT SetFullscreenState(BOOL Fullscreen, IDXGIOutput* pTarget) override;
+	HRESULT GetFullscreenState(BOOL* pFullscreen, IDXGIOutput** ppTarget) override;
+	HRESULT GetDesc(DXGI_SWAP_CHAIN_DESC* pDesc) override;
+	HRESULT ResizeBuffers(UINT BufferCount, UINT Width, UINT Height, DXGI_FORMAT NewFormat, UINT SwapChainFlags) override;
+	HRESULT ResizeTarget(const DXGI_MODE_DESC* pNewTargetParameters) override;
+	HRESULT GetContainingOutput(IDXGIOutput** ppOutput) override;
+	HRESULT GetFrameStatistics(DXGI_FRAME_STATISTICS* pStats) override;
+	HRESULT GetLastPresentCount(UINT* pLastPresentCount) override;
+	HRESULT GetDesc1(DXGI_SWAP_CHAIN_DESC1* pDesc) override;
+	HRESULT GetFullscreenDesc(DXGI_SWAP_CHAIN_FULLSCREEN_DESC* pDesc) override;
+	HRESULT GetHwnd(HWND* pHwnd) override;
+	HRESULT GetCoreWindow(const IID& refiid, void** ppUnk) override;
+	HRESULT Present1(UINT SyncInterval, UINT PresentFlags, const DXGI_PRESENT_PARAMETERS* pPresentParameters) override;
+	BOOL IsTemporaryMonoSupported() override;
+	HRESULT GetRestrictToOutput(IDXGIOutput** ppRestrictToOutput) override;
+	HRESULT SetRotation(DXGI_MODE_ROTATION Rotation) override;
+	HRESULT GetRotation(DXGI_MODE_ROTATION* pRotation) override;
+	HRESULT SetSourceSize(UINT Width, UINT Height) override;
+	HRESULT GetSourceSize(UINT* pWidth, UINT* pHeight) override;
+	HRESULT SetMaximumFrameLatency(UINT MaxLatency) override;
+	HRESULT GetMaximumFrameLatency(UINT* pMaxLatency) override;
+	HANDLE GetFrameLatencyWaitableObject() override;
+	HRESULT SetMatrixTransform(const DXGI_MATRIX_3X2_F* pMatrix) override;
+	HRESULT GetMatrixTransform(DXGI_MATRIX_3X2_F* pMatrix) override;
+	UINT GetCurrentBackBufferIndex() override;
+	HRESULT ResizeBuffers1(UINT BufferCount, UINT Width, UINT Height, DXGI_FORMAT Format, UINT SwapChainFlags,
+		const UINT* pCreationNodeMask, IUnknown* const* ppPresentQueue) override;
+	HRESULT SetHDRMetaData(DXGI_HDR_METADATA_TYPE Type, UINT Size, void* pMetaData) override;
+	HRESULT SetBackgroundColor(const DXGI_RGBA* pColor) override;
+	HRESULT GetBackgroundColor(DXGI_RGBA* pColor) override;
+	HRESULT CheckColorSpaceSupport(DXGI_COLOR_SPACE_TYPE ColorSpace, UINT* pColorSpaceSupport) override;
+	HRESULT SetColorSpace1(DXGI_COLOR_SPACE_TYPE ColorSpace) override;
 };

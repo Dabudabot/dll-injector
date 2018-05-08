@@ -2,12 +2,12 @@
 // each function to be hooked should be bounded by namespace
 // namespace contain pointer to function typedef, hooker class instance and detour function realisation
 #pragma once
+
 #include "stdafx.h"
 #include "hooker.h"
 #include "idxgiswapchain.h"
 #include "id3d11device.h"
 #include "idxgifactory.h"
-#include "idxgifactory1.h"
 
 /**
  * \brief function D3D11CreateDeviceAndSwapChain detouring
@@ -81,7 +81,7 @@ namespace MyD3D11CreateDeviceAndSwapChain
 		auto overlay = new Overlay(ppDevice, ppImmediateContext);	//free it when swapchain releases
 
 		//redirecting pointer to present function
-		*ppSwapChain = new MyIdxgiSwapChain(&pSwapChain, overlay);	//TODO: will it leak?
+		*ppSwapChain = new MyIdxgiSwapChain(&pSwapChain, overlay);
 
 		overlay->loadContent();
 		return retValue;																				// return original return value
@@ -170,7 +170,7 @@ namespace MyCreateDxgiFactory
 		memcpy(hooker.m_pOriginalFunction, hooker.m_jmp, SIZE);											// set the jump instruction again
 		VirtualProtect(LPVOID(hooker.m_pOriginalFunction), SIZE, hooker.m_oldProtect, nullptr);			// reset protection
 								
-		*ppFactory = new MyIDXGIFactory(&pFactory);	//TODO: will it leak?
+		*ppFactory = new MyIDXGIFactory(&pFactory);
 
 		return retValue;
 	}
@@ -200,11 +200,11 @@ namespace MyCreateDxgiFactory1
 
 		VirtualProtect(LPVOID(hooker.m_pOriginalFunction), SIZE, hooker.m_myProtect, nullptr);			// assign read write protection
 		memcpy(hooker.m_pOriginalFunction, hooker.m_oldBytes, SIZE);									// restore backup
-		const auto retValue = ::CreateDXGIFactory1(riid, &pFactory);															// get return value of original function and interface
+		const auto retValue = ::CreateDXGIFactory1(riid, &pFactory);									// get return value of original function and interface
 		memcpy(hooker.m_pOriginalFunction, hooker.m_jmp, SIZE);											// set the jump instruction again
 		VirtualProtect(LPVOID(hooker.m_pOriginalFunction), SIZE, hooker.m_oldProtect, nullptr);			// reset protection
 
-		*ppFactory = new MyIDXGIFactory1(&pFactory);
+		*ppFactory = new MyIDXGIFactory(&pFactory);
 
 		return retValue;
 	}
