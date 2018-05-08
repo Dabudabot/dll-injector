@@ -1,21 +1,51 @@
+// id3d11device.h : definitions of the class MyID3D11Device
+
 #pragma once
 #include "overlay.h"
-#include "idxgidevice.h"
 
-class MyID3D11Device : public ID3D11Device5
+class MyIdxgiDevice; // in order not to create cyclamatic inclidings
+
+/**
+ * \brief inherits from ID3D11Device5
+ * realisation of wrapper pattern, it just wraps the original functions of the ID3D11Device5
+ * changes the logic only of QueryInterface and Release functions
+ */
+class MyId3D11Device : public ID3D11Device5  // NOLINT(hicpp-special-member-functions, cppcoreguidelines-special-member-functions)
 {
-	ID3D11Device5* m_pDevice_ = nullptr;
-	MyIDXGIDevice* m_pIdxgiDevice_ = nullptr;
+	ID3D11Device5* m_pDevice_ = nullptr;		//original device
+	MyIdxgiDevice* m_pIdxgiDevice_ = nullptr;	//in case of queryinteface we will give it to caller
 
 public:
-	Overlay * m_overlay = nullptr;
+	Overlay * m_overlay = nullptr;				//need to pass further when swapchain will be defined
 
-	MyID3D11Device(ID3D11Device** ppDevice, Overlay *overlay);
-	~MyID3D11Device() = default;
+	/**
+	 * \brief ctor with default inits
+	 * \param ppDevice original device (will be casted to the latest version 5)
+	 * \param overlay need to pass it further
+	 */
+	MyId3D11Device(ID3D11Device** ppDevice, Overlay *overlay);
+	virtual ~MyId3D11Device() = default;
 
+	// original functions to be wrapper with enhancments
+public:
+	/**
+	 * \brief additional logic is replacing original ppvObject in case of 
+	 * ID3D11Device1, ID3D11Device2, ID3D11Device3, ID3D11Device4, ID3D11Device5
+	 * and IDXGIDevice, IDXGIDevice1, IDXGIDevice2
+	 * \param riid identificator of inteface
+	 * \param ppvObject returning object stored here
+	 * \return result of the function
+	 */
 	HRESULT QueryInterface(const IID& riid, void** ppvObject) override;
-	ULONG AddRef() override;
+	/**
+	 * \brief releases memory
+	 * \return original function call return
+	 */
 	ULONG Release() override;
+
+	// original functions to be wrapper without changing the logic
+public:
+	ULONG AddRef() override;
 	HRESULT CreateBuffer(const D3D11_BUFFER_DESC* pDesc, const D3D11_SUBRESOURCE_DATA* pInitialData,
 		ID3D11Buffer** ppBuffer) override;
 	HRESULT CreateTexture1D(const D3D11_TEXTURE1D_DESC* pDesc, const D3D11_SUBRESOURCE_DATA* pInitialData,

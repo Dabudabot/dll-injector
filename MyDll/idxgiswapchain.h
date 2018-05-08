@@ -3,13 +3,14 @@
 
 #include "overlay.h"
 
-class MyIdxgiSwapChain : public IDXGISwapChain4
+class MyIdxgiSwapChain : public IDXGISwapChain4  // NOLINT(hicpp-special-member-functions, cppcoreguidelines-special-member-functions)
 {
 	IDXGISwapChain4* m_ppSwapChain_ = nullptr;
 	Overlay* m_overlay_ = nullptr;
 
+	//ctors and dtor
 public:
-	~MyIdxgiSwapChain() = default;
+	virtual ~MyIdxgiSwapChain() = default;
 	/**
 	 * \brief ctor to init original swapchain and overlay
 	 * \param ppSwapChain original one
@@ -18,17 +19,22 @@ public:
 	explicit MyIdxgiSwapChain(IDXGISwapChain** ppSwapChain, Overlay *overlay);
 	explicit MyIdxgiSwapChain(IDXGISwapChain1** ppSwapChain, Overlay *overlay);
 
-	// Original functions
+
+	// original functions to be wrapper with enhancments
+public:
+	ULONG Release() override;
+	HRESULT Present(UINT SyncInterval, UINT Flags) override;
+	HRESULT Present1(UINT SyncInterval, UINT PresentFlags, const DXGI_PRESENT_PARAMETERS* pPresentParameters) override;
+
+	// original functions to be wrapper without changing the logic
 public:
 	HRESULT QueryInterface(const IID& riid, void** ppvObject) override;
 	ULONG AddRef() override;
-	ULONG Release() override;
 	HRESULT SetPrivateData(const GUID& Name, UINT DataSize, const void* pData) override;
 	HRESULT SetPrivateDataInterface(const GUID& Name, const IUnknown* pUnknown) override;
 	HRESULT GetPrivateData(const GUID& Name, UINT* pDataSize, void* pData) override;
 	HRESULT GetParent(const IID& riid, void** ppParent) override;
 	HRESULT GetDevice(const IID& riid, void** ppDevice) override;
-	HRESULT Present(UINT SyncInterval, UINT Flags) override;
 	HRESULT GetBuffer(UINT Buffer, const IID& riid, void** ppSurface) override;
 	HRESULT SetFullscreenState(BOOL Fullscreen, IDXGIOutput* pTarget) override;
 	HRESULT GetFullscreenState(BOOL* pFullscreen, IDXGIOutput** ppTarget) override;
@@ -42,7 +48,6 @@ public:
 	HRESULT GetFullscreenDesc(DXGI_SWAP_CHAIN_FULLSCREEN_DESC* pDesc) override;
 	HRESULT GetHwnd(HWND* pHwnd) override;
 	HRESULT GetCoreWindow(const IID& refiid, void** ppUnk) override;
-	HRESULT Present1(UINT SyncInterval, UINT PresentFlags, const DXGI_PRESENT_PARAMETERS* pPresentParameters) override;
 	BOOL IsTemporaryMonoSupported() override;
 	HRESULT GetRestrictToOutput(IDXGIOutput** ppRestrictToOutput) override;
 	HRESULT SetRotation(DXGI_MODE_ROTATION Rotation) override;

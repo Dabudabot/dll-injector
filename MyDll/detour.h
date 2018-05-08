@@ -136,7 +136,7 @@ namespace MyD3D11CreateDevice
 
 		const auto overlay = new Overlay(&pDevice, ppImmediateContext);	//free it when swapchain releases
 		//redirecting pointer to present function
-		*ppDevice = new MyID3D11Device(&pDevice, overlay);
+		*ppDevice = new MyId3D11Device(&pDevice, overlay);
 
 		return retValue;																				// return original return value
 	}
@@ -170,7 +170,7 @@ namespace MyCreateDxgiFactory
 		memcpy(hooker.m_pOriginalFunction, hooker.m_jmp, SIZE);											// set the jump instruction again
 		VirtualProtect(LPVOID(hooker.m_pOriginalFunction), SIZE, hooker.m_oldProtect, nullptr);			// reset protection
 								
-		*ppFactory = new MyIDXGIFactory(&pFactory);
+		*ppFactory = new MyIdxgiFactory(&pFactory);
 
 		return retValue;
 	}
@@ -204,7 +204,7 @@ namespace MyCreateDxgiFactory1
 		memcpy(hooker.m_pOriginalFunction, hooker.m_jmp, SIZE);											// set the jump instruction again
 		VirtualProtect(LPVOID(hooker.m_pOriginalFunction), SIZE, hooker.m_oldProtect, nullptr);			// reset protection
 
-		*ppFactory = new MyIDXGIFactory(&pFactory);
+		*ppFactory = new MyIdxgiFactory(&pFactory);
 
 		return retValue;
 	}
