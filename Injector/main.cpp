@@ -12,8 +12,8 @@
  */
 int _tmain(int argc, _TCHAR* argv[])
 {
-	const auto appName = L"C:\\Users\\Daulet\\source\\repos\\TriangleGreen2\\x64\\Release\\TriangleGreen.exe";
-	//const auto appName = L"C:\\Users\\Daulet\\source\\repos\\HDRToneMappingCS11.exe";
+	//const auto appName = L"C:\\Users\\Daulet\\source\\repos\\TriangleGreen2\\x64\\Release\\TriangleGreen.exe";
+	const auto appName = L"C:\\Users\\Daulet\\source\\repos\\HDRToneMappingCS11.exe";
 	//const auto appName = L"C:\\Users\\Daulet\\source\\repos\\SubD11.exe";
 	//const auto appName = L"C:\\Users\\Daulet\\Documents\\Visual Studio Projects\\DirectXSamples\\HDRToneMappingCS11\\x64\\Debug\\HDRToneMappingCS11.exe";
 	//const auto appName = L"C:\\ProgramData\\NVIDIA Corporation\\NVIDIA Direct3D SDK 11\\Bin\\Island11.exe";

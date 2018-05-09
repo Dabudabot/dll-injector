@@ -147,6 +147,10 @@ namespace MyD3D11CreateDevice
 		VirtualProtect(LPVOID(hooker.m_pOriginalFunction), SIZE, hooker.m_oldProtect, nullptr);			// reset protection
 
 		//MessageBox(nullptr, L"D3D11CreateDevice function called 2", L"MyDll.dll", MB_OK);
+		//auto test = pDevice->GetCreationFlags();
+		wchar_t text2[100];
+		wsprintf(text2, L"device pointer %p", pDevice);
+		MessageBox(nullptr, text2, L"MyDll.dll", MB_OK);
 
 		const auto overlay = new Overlay(&pDevice, ppImmediateContext);	//free it when swapchain releases
 		//redirecting pointer to present function

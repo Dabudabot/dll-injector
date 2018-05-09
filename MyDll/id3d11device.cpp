@@ -59,10 +59,15 @@ ULONG MyId3D11Device::Release()
 		//free(m_pIdxgiDevice_);
 	}
 
-	if (m_pDevice_ == nullptr)
-	{
-		MessageBox(nullptr, L"MyId3D11Device::Release", L"MyDll.dll", MB_OK);
-	}
+	wchar_t text2[100];
+	wsprintf(text2, L"device pointer %p", m_pDevice_);
+	MessageBox(nullptr, text2, L"MyDll.dll", MB_OK);
+	/*
+	auto test = m_pDevice_->GetCreationFlags();
+	wchar_t text[100];
+	wsprintf(text, L"pDevice creation flags %d", test);
+	MessageBox(nullptr, text, L"MyDll.dll", MB_OK);
+	*/
 	//free(m_pIdxgiDevice_);
 	return m_pDevice_->Release();
 }
