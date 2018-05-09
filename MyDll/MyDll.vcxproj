@@ -77,8 +77,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(DXSDK_DIR)Include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(DXSDK_DIR)Lib\x64;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(IncludePath);$(DXSDK_DIR)Include</IncludePath>
+    <LibraryPath>$(LibraryPath);$(DXSDK_DIR)Lib\x64</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -106,11 +106,12 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;MYDLL_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>DXUT\Optional;DXUT\Core;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>d3d11.lib;d3dx11.lib;dxerr.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3d11.lib;d3dx11d.lib;dxerr.lib;DXGI.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <FxCompile>
       <ShaderType>Effect</ShaderType>
@@ -157,6 +158,10 @@
   <ItemGroup>
     <ClInclude Include="detour.h" />
     <ClInclude Include="hooker.h" />
+    <ClInclude Include="id3d11device.h" />
+    <ClInclude Include="idxgiadapter.h" />
+    <ClInclude Include="idxgidevice.h" />
+    <ClInclude Include="idxgifactory.h" />
     <ClInclude Include="idxgiswapchain.h" />
     <ClInclude Include="overlay.h" />
     <ClInclude Include="stdafx.h" />
@@ -165,6 +170,10 @@
   <ItemGroup>
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="hooker.cpp" />
+    <ClCompile Include="id3d11device.cpp" />
+    <ClCompile Include="idxgiadapter.cpp" />
+    <ClCompile Include="idxgidevice.cpp" />
+    <ClCompile Include="idxgifactory.cpp" />
     <ClCompile Include="idxgiswapchain.cpp" />
     <ClCompile Include="overlay.cpp" />
     <ClCompile Include="stdafx.cpp">

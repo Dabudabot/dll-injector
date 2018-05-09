@@ -45,7 +45,7 @@ bool Overlay::compileShader(const LPCWSTR szFilePath, const LPCSTR szFunc, const
 
 bool Overlay::loadContent()
 {
-	const auto shaderPath = L"C:\\Users\\Daulet\\source\\repos\\RE-S18\\RE-S18\\x64\\Debug\\ShaderRedColor.fx";
+	const auto shaderPath = L"C:\\Users\\Daulet\\source\\repos\\RE-S18\\RE-S18\\MyDll\\ShaderRedColor.fx";
 	// Compile vertex shader
 	ID3DBlob* pVsBuffer = nullptr;
 	auto res = compileShader(shaderPath, "VS_Main", "vs_4_0", &pVsBuffer);
