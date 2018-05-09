@@ -9,6 +9,14 @@ MyId3D11Device::MyId3D11Device(ID3D11Device** ppDevice, Overlay *overlay)
 
 HRESULT MyId3D11Device::QueryInterface(const IID& riid, void** ppvObject)
 {
+	/*
+	wchar_t text[100];
+	wsprintf(text, L"MyId3D11Device::QueryInterface function called with %d, ID3D11Device1 = %d, ID3D11Device2 = %d, ID3D11Device3 = %d, ID3D11Device4 = %d, ID3D11Device5 = %d, IDXGIDevice = %d, IDXGIDevice1 = %d, IDXGIDevice2 = %d", 
+		riid, __uuidof(ID3D11Device1), __uuidof(ID3D11Device2), __uuidof(ID3D11Device3), __uuidof(ID3D11Device4), __uuidof(ID3D11Device5)
+		, __uuidof(IDXGIDevice), __uuidof(IDXGIDevice1), __uuidof(IDXGIDevice2));
+	MessageBox(nullptr, text, L"MyDll.dll", MB_OK);
+	*/
+
 	const auto result = m_pDevice_->QueryInterface(riid, ppvObject);
 
 	if (riid == __uuidof(ID3D11Device1) || 
@@ -17,15 +25,20 @@ HRESULT MyId3D11Device::QueryInterface(const IID& riid, void** ppvObject)
 		riid == __uuidof(ID3D11Device4) ||
 		riid == __uuidof(ID3D11Device5))
 	{
-		ppvObject = reinterpret_cast<void**>(&m_pDevice_);
+		auto a = static_cast<void*>(m_pDevice_);
+		ppvObject = &a;
+		//ppvObject = reinterpret_cast<void**>(&m_pDevice);
+		MessageBox(nullptr, L"ID3D11Device1", L"MyDll.dll", MB_OK);
 	}
 	else if (riid == __uuidof(IDXGIDevice)	||
 			 riid == __uuidof(IDXGIDevice1)	||
 			 riid == __uuidof(IDXGIDevice2))
 	{
-		auto device = static_cast<IDXGIDevice2*>(*ppvObject);
-		m_pIdxgiDevice_ = new MyIdxgiDevice(&device);
-		ppvObject = reinterpret_cast<void**>(&m_pIdxgiDevice_);
+		m_pIdxgiDevice_ = new MyIdxgiDevice(ppvObject);
+		auto a = static_cast<void*>(m_pIdxgiDevice_);
+		ppvObject = &a;
+		//ppvObject = reinterpret_cast<void**>(&m_pIdxgiDevice);
+		//MessageBox(nullptr, L"IDXGIDevice", L"MyDll.dll", MB_OK);
 	}
 
 	return result;
@@ -38,7 +51,19 @@ ULONG MyId3D11Device::AddRef()
 
 ULONG MyId3D11Device::Release()
 {
-	free(m_pIdxgiDevice_);
+	//MessageBox(nullptr, L"MyId3D11Device::Release", L"MyDll.dll", MB_OK);
+	//free(m_pIdxgiDevice_);
+	if (m_pIdxgiDevice_ != nullptr)
+	{
+		m_pIdxgiDevice_->Release();
+		//free(m_pIdxgiDevice_);
+	}
+
+	if (m_pDevice_ == nullptr)
+	{
+		MessageBox(nullptr, L"MyId3D11Device::Release", L"MyDll.dll", MB_OK);
+	}
+	//free(m_pIdxgiDevice_);
 	return m_pDevice_->Release();
 }
 

@@ -1,9 +1,9 @@
 #include "stdafx.h"
 #include "idxgidevice.h"
 
-MyIdxgiDevice::MyIdxgiDevice(IDXGIDevice2** ppvObject)
+MyIdxgiDevice::MyIdxgiDevice(void** ppvObject)
 {
-	m_pDevice_ = *ppvObject;
+	m_pDevice_ = static_cast<IDXGIDevice2*>(*ppvObject);
 }
 
 HRESULT MyIdxgiDevice::QueryInterface(const IID& riid, void** ppvObject)
@@ -18,7 +18,11 @@ ULONG MyIdxgiDevice::AddRef()
 
 ULONG MyIdxgiDevice::Release()
 {
-	free(m_pIdxgiAdapter_);
+	if (m_pIdxgiAdapter_ != nullptr)
+	{
+		m_pIdxgiAdapter_->Release();
+		free(m_pIdxgiAdapter_);
+	}
 	return m_pDevice_->Release();
 }
 
@@ -39,6 +43,11 @@ HRESULT MyIdxgiDevice::GetPrivateData(const GUID& Name, UINT* pDataSize, void* p
 
 HRESULT MyIdxgiDevice::GetParent(const IID& riid, void** ppParent)
 {
+	wchar_t text[100];
+	wsprintf(text, L"MyIdxgiDevice::GetParent function called with %d, IDXGIAdapter = %d, IDXGIAdapter1 = %d, IDXGIAdapter2 = %d, IDXGIAdapter3 = %d, IDXGIAdapter4 = %d",
+		riid, __uuidof(IDXGIAdapter), __uuidof(IDXGIAdapter1), __uuidof(IDXGIAdapter2), __uuidof(IDXGIAdapter3), __uuidof(IDXGIAdapter4));
+	MessageBox(nullptr, text, L"MyDll.dll", MB_OK);
+
 	const auto result = m_pDevice_->GetParent(riid, ppParent);
 	if (riid == __uuidof(IDXGIAdapter) ||
 		riid == __uuidof(IDXGIAdapter1) ||
@@ -48,7 +57,9 @@ HRESULT MyIdxgiDevice::GetParent(const IID& riid, void** ppParent)
 	{
 		auto adapter = static_cast<IDXGIAdapter4*>(*ppParent);
 		m_pIdxgiAdapter_ = new MyIdxgiAdapter(&adapter);
-		ppParent = reinterpret_cast<void**>(&m_pIdxgiAdapter_);
+		auto a = static_cast<void*>(m_pIdxgiAdapter_);
+		ppParent = &a;
+		//ppParent = reinterpret_cast<void**>(&m_pIdxgiAdapter_);
 	}
 	return result;
 }

@@ -2,8 +2,7 @@
 
 #pragma once
 #include "overlay.h"
-
-class MyIdxgiDevice; // in order not to create cyclamatic inclidings
+#include "idxgidevice.h"
 
 /**
  * \brief inherits from ID3D11Device5
@@ -16,6 +15,7 @@ class MyId3D11Device : public ID3D11Device5  // NOLINT(hicpp-special-member-func
 	MyIdxgiDevice* m_pIdxgiDevice_ = nullptr;	//in case of queryinteface we will give it to caller
 
 public:
+	
 	Overlay * m_overlay = nullptr;				//need to pass further when swapchain will be defined
 
 	/**

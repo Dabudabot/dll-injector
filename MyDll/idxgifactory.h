@@ -1,8 +1,6 @@
 // idxgidevice.h : definitions of the class MyIDXGIDevice
 
 #pragma once
-#include "idxgiswapchain.h"
-#include "id3d11device.h"
 
 /**
  * \brief 

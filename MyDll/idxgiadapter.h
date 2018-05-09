@@ -2,7 +2,7 @@
 
 #pragma once
 
-class MyIdxgiFactory; // in order not to create cyclamatic inclidings
+#include "idxgifactory.h"
 
 /**
  * \brief inherits from IDXGIAdapter4

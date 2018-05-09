@@ -1,5 +1,7 @@
 #include "stdafx.h"
 #include "idxgifactory.h"
+#include "id3d11device.h"
+#include "idxgiswapchain.h"
 
 MyIdxgiFactory::MyIdxgiFactory(void** ppFactory)
 {
@@ -58,6 +60,7 @@ HRESULT MyIdxgiFactory::GetWindowAssociation(HWND* pWindowHandle)
 
 HRESULT MyIdxgiFactory::CreateSwapChain(IUnknown* pDevice, DXGI_SWAP_CHAIN_DESC* pDesc, IDXGISwapChain** ppSwapChain)
 {
+	MessageBox(nullptr, L"CreateSwapChain function called", L"MyDll.dll", MB_OK);
 	const auto result = m_pFactory_->CreateSwapChain(pDevice, pDesc, ppSwapChain);
 	auto overlay = static_cast<MyId3D11Device*>(pDevice)->m_overlay;
 	*ppSwapChain = new MyIdxgiSwapChain(ppSwapChain, overlay);
@@ -88,6 +91,7 @@ BOOL MyIdxgiFactory::IsWindowedStereoEnabled()
 HRESULT MyIdxgiFactory::CreateSwapChainForHwnd(IUnknown* pDevice, HWND hWnd, const DXGI_SWAP_CHAIN_DESC1* pDesc,
 	const DXGI_SWAP_CHAIN_FULLSCREEN_DESC* pFullscreenDesc, IDXGIOutput* pRestrictToOutput, IDXGISwapChain1** ppSwapChain)
 {
+	MessageBox(nullptr, L"CreateSwapChainForHwnd function called", L"MyDll.dll", MB_OK);
 	const auto result = m_pFactory_->CreateSwapChainForHwnd(pDevice, hWnd, pDesc, pFullscreenDesc, pRestrictToOutput, ppSwapChain);
 	auto overlay = static_cast<MyId3D11Device*>(pDevice)->m_overlay;
 	*ppSwapChain = new MyIdxgiSwapChain(ppSwapChain, overlay);
@@ -98,6 +102,7 @@ HRESULT MyIdxgiFactory::CreateSwapChainForHwnd(IUnknown* pDevice, HWND hWnd, con
 HRESULT MyIdxgiFactory::CreateSwapChainForCoreWindow(IUnknown* pDevice, IUnknown* pWindow,
 	const DXGI_SWAP_CHAIN_DESC1* pDesc, IDXGIOutput* pRestrictToOutput, IDXGISwapChain1** ppSwapChain)
 {
+	MessageBox(nullptr, L"CreateSwapChainForCoreWindow function called", L"MyDll.dll", MB_OK);
 	const auto result = m_pFactory_->CreateSwapChainForCoreWindow(pDevice, pWindow, pDesc, pRestrictToOutput, ppSwapChain);
 	auto overlay = static_cast<MyId3D11Device*>(pDevice)->m_overlay;
 	*ppSwapChain = new MyIdxgiSwapChain(ppSwapChain, overlay);
@@ -143,6 +148,7 @@ void MyIdxgiFactory::UnregisterOcclusionStatus(DWORD dwCookie)
 HRESULT MyIdxgiFactory::CreateSwapChainForComposition(IUnknown* pDevice, const DXGI_SWAP_CHAIN_DESC1* pDesc,
 	IDXGIOutput* pRestrictToOutput, IDXGISwapChain1** ppSwapChain)
 {
+	MessageBox(nullptr, L"CreateSwapChainForComposition function called", L"MyDll.dll", MB_OK);
 	const auto result = m_pFactory_->CreateSwapChainForComposition(pDevice, pDesc, pRestrictToOutput, ppSwapChain);
 	auto overlay = static_cast<MyId3D11Device*>(pDevice)->m_overlay;
 	*ppSwapChain = new MyIdxgiSwapChain(ppSwapChain, overlay);

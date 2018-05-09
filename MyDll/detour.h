@@ -62,11 +62,15 @@ namespace MyD3D11CreateDeviceAndSwapChain
 		         UINT FeatureLevels,
 		         UINT SDKVersion,
 		         _In_opt_ const DXGI_SWAP_CHAIN_DESC* pSwapChainDesc,
-		         _Out_opt_ MyIdxgiSwapChain** ppSwapChain,
+		         _Out_opt_ IDXGISwapChain** ppSwapChain,
 		         _Out_opt_ ID3D11Device** ppDevice,
 		         _Out_opt_ D3D_FEATURE_LEVEL* pFeatureLevel,
 		         _Out_opt_ ID3D11DeviceContext** ppImmediateContext
 	) {
+		//wchar_t text[100];
+		//wsprintf(text, L"D3D11CreateDeviceAndSwapChain function called hooker.m_oldBytes %x to %x", hooker.m_oldBytes, hooker.m_jmp);
+		//MessageBox(nullptr, text, L"MyDll.dll", MB_OK);
+
 		IDXGISwapChain* pSwapChain = nullptr;
 
 		VirtualProtect(LPVOID(hooker.m_pOriginalFunction), SIZE, hooker.m_myProtect, nullptr);			// assign read write protection
@@ -84,6 +88,11 @@ namespace MyD3D11CreateDeviceAndSwapChain
 		*ppSwapChain = new MyIdxgiSwapChain(&pSwapChain, overlay);
 
 		overlay->loadContent();
+
+		//*ppSwapChain = pSwapChain;
+
+		//MessageBox(nullptr, L"D3D11CreateDeviceAndSwapChain function called", L"MyDll.dll", MB_OK);
+
 		return retValue;																				// return original return value
 	}
 };
@@ -124,19 +133,26 @@ namespace MyD3D11CreateDevice
 		_Out_opt_       ID3D11DeviceContext **ppImmediateContext
 	)
 	{
+		
+
 		ID3D11Device* pDevice = nullptr;
 
 		VirtualProtect(LPVOID(hooker.m_pOriginalFunction), SIZE, hooker.m_myProtect, nullptr);			// assign read write protection
 		memcpy(hooker.m_pOriginalFunction, hooker.m_oldBytes, SIZE);									// restore backup
+		//MessageBox(nullptr, L"D3D11CreateDevice function called 1", L"MyDll.dll", MB_OK);
 		const auto retValue = ::D3D11CreateDevice(pAdapter, DriverType, Software,
 			Flags, pFeatureLevels, FeatureLevels, SDKVersion,
 			&pDevice, pFeatureLevel, ppImmediateContext);															// get return value of original function and interface
 		memcpy(hooker.m_pOriginalFunction, hooker.m_jmp, SIZE);											// set the jump instruction again
 		VirtualProtect(LPVOID(hooker.m_pOriginalFunction), SIZE, hooker.m_oldProtect, nullptr);			// reset protection
 
+		//MessageBox(nullptr, L"D3D11CreateDevice function called 2", L"MyDll.dll", MB_OK);
+
 		const auto overlay = new Overlay(&pDevice, ppImmediateContext);	//free it when swapchain releases
 		//redirecting pointer to present function
 		*ppDevice = new MyId3D11Device(&pDevice, overlay);
+
+		//MessageBox(nullptr, L"D3D11CreateDevice function called", L"MyDll.dll", MB_OK);
 
 		return retValue;																				// return original return value
 	}
@@ -162,6 +178,7 @@ namespace MyCreateDxgiFactory
 		_Out_ void   **ppFactory
 	)
 	{
+		//MessageBox(nullptr, L"CreateDXGIFactory function called 1", L"MyDll.dll", MB_OK);
 		void* pFactory = nullptr;
 
 		VirtualProtect(LPVOID(hooker.m_pOriginalFunction), SIZE, hooker.m_myProtect, nullptr);			// assign read write protection
@@ -171,6 +188,8 @@ namespace MyCreateDxgiFactory
 		VirtualProtect(LPVOID(hooker.m_pOriginalFunction), SIZE, hooker.m_oldProtect, nullptr);			// reset protection
 								
 		*ppFactory = new MyIdxgiFactory(&pFactory);
+
+		//MessageBox(nullptr, L"CreateDXGIFactory function called", L"MyDll.dll", MB_OK);
 
 		return retValue;
 	}
@@ -196,6 +215,12 @@ namespace MyCreateDxgiFactory1
 		_Out_ void   **ppFactory
 	)
 	{
+
+		//wchar_t text[100];
+		//wsprintf(text, L"CreateDXGIFactory1 function called hooker.m_oldBytes %x to %x", hooker.m_oldBytes, hooker.m_jmp);
+		//MessageBox(nullptr, text, L"MyDll.dll", MB_OK);
+
+		//MessageBox(nullptr, L"CreateDXGIFactory1 function called 1", L"MyDll.dll", MB_OK);
 		void* pFactory = nullptr;
 
 		VirtualProtect(LPVOID(hooker.m_pOriginalFunction), SIZE, hooker.m_myProtect, nullptr);			// assign read write protection
@@ -205,6 +230,8 @@ namespace MyCreateDxgiFactory1
 		VirtualProtect(LPVOID(hooker.m_pOriginalFunction), SIZE, hooker.m_oldProtect, nullptr);			// reset protection
 
 		*ppFactory = new MyIdxgiFactory(&pFactory);
+
+		//MessageBox(nullptr, L"CreateDXGIFactory1 function called", L"MyDll.dll", MB_OK);
 
 		return retValue;
 	}

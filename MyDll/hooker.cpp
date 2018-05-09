@@ -12,6 +12,10 @@ void Hooker::initHook(const LPCTSTR moduleName, const LPCSTR functionName, LPVOI
 		return;
 	}
 
+	//wchar_t text[100];
+	//wsprintf(text, L"JMP Write for %x to %x", DWORD(m_pOriginalFunction), DWORD(pNewFunction));
+	//MessageBox(nullptr, text, L"MyDll.dll", MB_OK);
+
 	BYTE tempJmp[SIZE] = { 0xE9, 0x90, 0x90, 0x90, 0x90, 0xC3 };								// 0xE9 = JMP 0x90 = NOP 0xC3 = RET
 	memcpy(m_jmp, tempJmp, SIZE);																// store jmp instruction to m_jmp
 	auto jmpSize = (DWORD(pNewFunction) - DWORD(m_pOriginalFunction) - 5);						// calculate jump distance

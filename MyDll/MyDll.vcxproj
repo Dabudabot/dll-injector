@@ -106,11 +106,12 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;MYDLL_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>DXUT\Optional;DXUT\Core;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>d3d11.lib;d3dx11.lib;dxerr.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3d11.lib;d3dx11d.lib;dxerr.lib;DXGI.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <FxCompile>
       <ShaderType>Effect</ShaderType>

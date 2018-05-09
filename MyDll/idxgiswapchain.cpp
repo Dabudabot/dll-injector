@@ -26,8 +26,11 @@ ULONG MyIdxgiSwapChain::AddRef()
 
 ULONG MyIdxgiSwapChain::Release()
 {
-	m_overlay_->unloadContent();
-	free(m_overlay_);
+	if (m_overlay_ != nullptr)
+	{
+		m_overlay_->unloadContent();
+		free(m_overlay_);
+	}
 	return m_ppSwapChain_->Release();
 }
 

@@ -2,7 +2,7 @@
 
 #pragma once
 
-class MyIdxgiAdapter;	// in order not to create cyclamatic inclidings
+#include "idxgiadapter.h"
 
 /**
  * \brief inherits from IDXGIDevice2
@@ -17,7 +17,7 @@ class MyIdxgiDevice : public IDXGIDevice2  // NOLINT(hicpp-special-member-functi
 
 	//ctors and dtors
 public:
-	explicit MyIdxgiDevice(IDXGIDevice2** ppvObject);
+	explicit MyIdxgiDevice(void** ppvObject);
 	virtual ~MyIdxgiDevice() = default;
 
 	// original functions to be wrapper with enhancments

@@ -18,7 +18,12 @@ ULONG MyIdxgiAdapter::AddRef()
 
 ULONG MyIdxgiAdapter::Release()
 {
-	free(m_factory_);
+	if (m_factory_ != nullptr)
+	{
+		m_factory_->Release();
+		free(m_factory_);
+	}
+	
 	return m_idxgiAdapter4_->Release();
 }
 
@@ -39,13 +44,20 @@ HRESULT MyIdxgiAdapter::GetPrivateData(const GUID& Name, UINT* pDataSize, void* 
 
 HRESULT MyIdxgiAdapter::GetParent(const IID& riid, void** ppParent)
 {
+	wchar_t text[100];
+	wsprintf(text, L"MyIdxgiAdapter::GetParent function called with %d, IDXGIFactory = %d, IDXGIFactory1 = %d, IDXGIFactory2 = %d",
+		riid, __uuidof(IDXGIFactory), __uuidof(IDXGIFactory1), __uuidof(IDXGIFactory2));
+	MessageBox(nullptr, text, L"MyDll.dll", MB_OK);
+
 	const auto result = m_idxgiAdapter4_->GetParent(riid, ppParent);
 	if (riid == __uuidof(IDXGIFactory) || 
 		riid == __uuidof(IDXGIFactory1) || 
 		riid == __uuidof(IDXGIFactory2))
 	{
 		m_factory_ = new MyIdxgiFactory(ppParent);
-		ppParent = reinterpret_cast<void**>(&m_factory_);
+		auto a = static_cast<void*>(m_factory_);
+		ppParent = &a;
+		//ppParent = reinterpret_cast<void**>(&m_factory_);
 	}
 	return result;
 }
