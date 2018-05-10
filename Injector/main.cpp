@@ -14,8 +14,8 @@ int _tmain(int argc, _TCHAR* argv[])
 {
 	//const auto appName = L"C:\\Users\\Daulet\\source\\repos\\TriangleGreen2\\x64\\Release\\TriangleGreen.exe";
 	//const auto appName = L"C:\\Users\\Daulet\\source\\repos\\HDRToneMappingCS11.exe";
-	const auto appName = L"C:\\Users\\Daulet\\Documents\\Visual Studio Projects\\DirectXSamples\\HDRToneMappingCS11\\x64\\Debug\\HDRToneMappingCS11.exe";
-	//const auto appName = L"C:\\Users\\Daulet\\source\\repos\\SubD11.exe";
+	//const auto appName = L"C:\\Users\\Daulet\\Documents\\Visual Studio Projects\\DirectXSamples\\HDRToneMappingCS11\\x64\\Debug\\HDRToneMappingCS11.exe";
+	const auto appName = L"C:\\Program Files (x86)\\Microsoft DirectX SDK (June 2010)\\Samples\\C++\\Direct3D11\\Bin\\x64\\SubD11.exe";
 	
 	InjectorFactory injectorFactory(appName);
 	auto injector = injectorFactory.getInjector();
