@@ -59,9 +59,9 @@ ULONG MyId3D11Device::Release()
 		//free(m_pIdxgiDevice_);
 	}
 
-	wchar_t text2[100];
-	wsprintf(text2, L"device pointer %p", m_pDevice_);
-	MessageBox(nullptr, text2, L"MyDll.dll", MB_OK);
+	//wchar_t text2[100];
+	//wsprintf(text2, L"device pointer %p", m_pDevice_);
+	//MessageBox(nullptr, text2, L"MyDll.dll", MB_OK);
 	/*
 	auto test = m_pDevice_->GetCreationFlags();
 	wchar_t text[100];

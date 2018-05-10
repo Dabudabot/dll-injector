@@ -12,9 +12,9 @@ void Hooker::initHook(const LPCTSTR moduleName, const LPCSTR functionName, LPVOI
 		return;
 	}
 
-	wchar_t text[100];
-	wsprintf(text, L"1 JMP Write for %p to %p", m_pOriginalFunction, pNewFunction);
-	MessageBox(nullptr, text, L"MyDll.dll", MB_OK);
+	//wchar_t text[100];
+	//wsprintf(text, L"1 JMP Write for %p to %p", m_pOriginalFunction, pNewFunction);
+	//MessageBox(nullptr, text, L"MyDll.dll", MB_OK);
 
 	BYTE tempJmp[SIZE] = { 0xE9, 0x90, 0x90, 0x90, 0x90, 0xC3 };								// 0xE9 = JMP 0x90 = NOP 0xC3 = RET
 	memcpy(m_jmp, tempJmp, SIZE);																// store jmp instruction to m_jmp
@@ -26,9 +26,9 @@ void Hooker::initHook(const LPCTSTR moduleName, const LPCSTR functionName, LPVOI
 	memcpy(m_pOriginalFunction, m_jmp, SIZE);													// set jump instruction at the beginning of the original function
 	VirtualProtect(LPVOID(m_pOriginalFunction), SIZE, m_oldProtect, nullptr);					// reset protection
 
-	wchar_t text2[100];
-	wsprintf(text2, L"2 JMP Write for %p to %p", m_pOriginalFunction, pNewFunction);
-	MessageBox(nullptr, text2, L"MyDll.dll", MB_OK);
+	//wchar_t text2[100];
+	//wsprintf(text2, L"2 JMP Write for %p to %p", m_pOriginalFunction, pNewFunction);
+	//MessageBox(nullptr, text2, L"MyDll.dll", MB_OK);
 }
 
 void Hooker::unhook() const
