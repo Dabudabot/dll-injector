@@ -70,7 +70,7 @@ ULONG MyId3D11Device::Release()
 	*/
 	//free(m_pIdxgiDevice_);
 	//return m_pDevice_->Release();
-	return 1L;
+	return m_pDevice_->Release();;
 }
 
 HRESULT MyId3D11Device::CreateBuffer(const D3D11_BUFFER_DESC* pDesc, const D3D11_SUBRESOURCE_DATA* pInitialData,
