@@ -51,7 +51,7 @@ ULONG MyId3D11Device::AddRef()
 
 ULONG MyId3D11Device::Release()
 {
-	//MessageBox(nullptr, L"MyId3D11Device::Release", L"MyDll.dll", MB_OK);
+	MessageBox(nullptr, L"MyId3D11Device::Release", L"MyDll.dll", MB_OK);
 	//free(m_pIdxgiDevice_);
 	if (m_pIdxgiDevice_ != nullptr)
 	{
@@ -69,7 +69,8 @@ ULONG MyId3D11Device::Release()
 	MessageBox(nullptr, text, L"MyDll.dll", MB_OK);
 	*/
 	//free(m_pIdxgiDevice_);
-	return m_pDevice_->Release();
+	//return m_pDevice_->Release();
+	return 1L;
 }
 
 HRESULT MyId3D11Device::CreateBuffer(const D3D11_BUFFER_DESC* pDesc, const D3D11_SUBRESOURCE_DATA* pInitialData,
