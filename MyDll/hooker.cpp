@@ -16,7 +16,7 @@ void Hooker::initHook(const LPCTSTR moduleName, const LPCSTR functionName, LPVOI
 	//wsprintf(text, L"1 JMP Write for %p to %p", m_pOriginalFunction, pNewFunction);
 	//MessageBox(nullptr, text, L"MyDll.dll", MB_OK);
 
-	BYTE tempJmp[SIZE] = { 0xE9, 0x90, 0x90, 0x90, 0x90, 0xC3 };								// 0xE9 = JMP 0x90 = NOP 0xC3 = RET
+	BYTE tempJmp[SIZE] = { 0xE9, 0x90, 0x90, 0x90, 0x90, 0xC3 }; //put here 0xCC								// 0xE9 = JMP 0x90 = NOP 0xC3 = RET
 	memcpy(m_jmp, tempJmp, SIZE);																// store jmp instruction to m_jmp
 	auto jmpSize = (DWORD(pNewFunction) - DWORD(m_pOriginalFunction) - 5);						// calculate jump distance
 	VirtualProtect(LPVOID(m_pOriginalFunction), SIZE,											// assign read write protection
