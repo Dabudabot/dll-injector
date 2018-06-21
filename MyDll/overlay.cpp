@@ -137,6 +137,8 @@ bool Overlay::loadContent()
 		return false;  // NOLINT(readability-simplify-boolean-expr)
 	}
 
+	MessageBox(nullptr, L"Overlay draw", L"MyDll.dll", MB_OK);
+
 	return true;
 }
 

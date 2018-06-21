@@ -67,31 +67,49 @@ namespace MyD3D11CreateDeviceAndSwapChain
 		         _Out_opt_ D3D_FEATURE_LEVEL* pFeatureLevel,
 		         _Out_opt_ ID3D11DeviceContext** ppImmediateContext
 	) {
+
+		ID3D11Device* pDevice = nullptr;
+		IDXGISwapChain* pSwapChain = nullptr;
+		HRESULT retValue;
+
 		//wchar_t text[100];
 		//wsprintf(text, L"D3D11CreateDeviceAndSwapChain function called hooker.m_oldBytes %x to %x", hooker.m_oldBytes, hooker.m_jmp);
-		//MessageBox(nullptr, text, L"MyDll.dll", MB_OK);
-
-		IDXGISwapChain* pSwapChain = nullptr;
+		//MessageBox(nullptr, L"D3D11CreateDeviceAndSwapChain", L"MyDll.dll", MB_OK);
 
 		VirtualProtect(LPVOID(hooker.m_pOriginalFunction), SIZE, hooker.m_myProtect, nullptr);			// assign read write protection
 		memcpy(hooker.m_pOriginalFunction, hooker.m_oldBytes, SIZE);									// restore backup
-		const auto retValue = ::D3D11CreateDeviceAndSwapChain(pAdapter, DriverType, Software,
-			Flags, pFeatureLevels, FeatureLevels, SDKVersion,
-			pSwapChainDesc, &pSwapChain, ppDevice,
-			pFeatureLevel, ppImmediateContext);															// get return value of original function and interface
+		if (ppSwapChain == nullptr)	
+		{
+			//it requested only device
+			retValue = ::D3D11CreateDeviceAndSwapChain(pAdapter, DriverType, Software,
+				Flags, pFeatureLevels, FeatureLevels, SDKVersion,
+				pSwapChainDesc, ppSwapChain, &pDevice,
+				pFeatureLevel, ppImmediateContext);														// get return value of original function and interface
+			MessageBox(nullptr, L"D3D11CreateDeviceAndSwapChain + device", L"MyDll.dll", MB_OK);
+		}
+		else
+		{
+			//it requested device and swapchain
+			retValue = ::D3D11CreateDeviceAndSwapChain(pAdapter, DriverType, Software,
+				Flags, pFeatureLevels, FeatureLevels, SDKVersion,
+				pSwapChainDesc, &pSwapChain, &pDevice,
+				pFeatureLevel, ppImmediateContext);														// get return value of original function and interface
+			MessageBox(nullptr, L"D3D11CreateDeviceAndSwapChain + pSwapChain", L"MyDll.dll", MB_OK);
+		}
 		memcpy(hooker.m_pOriginalFunction, hooker.m_jmp, SIZE);											// set the jump instruction again
 		VirtualProtect(LPVOID(hooker.m_pOriginalFunction), SIZE, hooker.m_oldProtect, nullptr);			// reset protection
 
-		auto overlay = new Overlay(ppDevice, ppImmediateContext);	//free it when swapchain releases
+		auto overlay = new Overlay(&pDevice, ppImmediateContext);										//free it when swapchain releases
 
-		//redirecting pointer to present function
-		*ppSwapChain = new MyIdxgiSwapChain(&pSwapChain, overlay);
+		if (pSwapChain != nullptr)
+		{
+			*ppSwapChain = new MyIdxgiSwapChain(&pSwapChain, overlay);
+			overlay->loadContent();
+		}
 
-		overlay->loadContent();
+		*ppDevice = new MyId3D11Device(&pDevice, overlay);
 
-		//*ppSwapChain = pSwapChain;
-
-		//MessageBox(nullptr, L"D3D11CreateDeviceAndSwapChain function called", L"MyDll.dll", MB_OK);
+		//Sleep(1000);
 
 		return retValue;																				// return original return value
 	}
@@ -147,6 +165,10 @@ namespace MyD3D11CreateDevice
 		VirtualProtect(LPVOID(hooker.m_pOriginalFunction), SIZE, hooker.m_oldProtect, nullptr);			// reset protection
 
 		//MessageBox(nullptr, L"D3D11CreateDevice function called 2", L"MyDll.dll", MB_OK);
+		//auto test = pDevice->GetCreationFlags();
+		//wchar_t text2[100];
+		//wsprintf(text2, L"device pointer %p", pDevice);
+		//MessageBox(nullptr, text2, L"MyDll.dll", MB_OK);
 
 		const auto overlay = new Overlay(&pDevice, ppImmediateContext);	//free it when swapchain releases
 		//redirecting pointer to present function

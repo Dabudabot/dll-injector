@@ -51,7 +51,7 @@ ULONG MyId3D11Device::AddRef()
 
 ULONG MyId3D11Device::Release()
 {
-	//MessageBox(nullptr, L"MyId3D11Device::Release", L"MyDll.dll", MB_OK);
+	MessageBox(nullptr, L"MyId3D11Device::Release", L"MyDll.dll", MB_OK);
 	//free(m_pIdxgiDevice_);
 	if (m_pIdxgiDevice_ != nullptr)
 	{
@@ -59,12 +59,18 @@ ULONG MyId3D11Device::Release()
 		//free(m_pIdxgiDevice_);
 	}
 
-	if (m_pDevice_ == nullptr)
-	{
-		MessageBox(nullptr, L"MyId3D11Device::Release", L"MyDll.dll", MB_OK);
-	}
+	//wchar_t text2[100];
+	//wsprintf(text2, L"device pointer %p", m_pDevice_);
+	//MessageBox(nullptr, text2, L"MyDll.dll", MB_OK);
+	/*
+	auto test = m_pDevice_->GetCreationFlags();
+	wchar_t text[100];
+	wsprintf(text, L"pDevice creation flags %d", test);
+	MessageBox(nullptr, text, L"MyDll.dll", MB_OK);
+	*/
 	//free(m_pIdxgiDevice_);
-	return m_pDevice_->Release();
+	//return m_pDevice_->Release();
+	return m_pDevice_->Release();;
 }
 
 HRESULT MyId3D11Device::CreateBuffer(const D3D11_BUFFER_DESC* pDesc, const D3D11_SUBRESOURCE_DATA* pInitialData,
