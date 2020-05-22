@@ -8,7 +8,7 @@ Simple example of usage ASM code in C/C++ project.
 
 ### dx_hook.dll
 
-### tests: dx_app.exe, dx_bin.exe, my_app.exe, my_dll.exe
+### tests: dx_app.exe, my_app.exe, my_dll.exe
 
 ## Build
 

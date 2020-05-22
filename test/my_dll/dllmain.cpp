@@ -1,5 +1,22 @@
-// dllmain.cpp : Defines the entry point for the DLL application.
+/*++
+
+\author Daulet Tumbayev
+\brief dllmain.cpp : Defines the entry point for the DLL application.
+                     This dll injected to test app
+\env User mode
+
+--*/
+
+//------------------------------------------------------------------------
+//  Includes.
+//------------------------------------------------------------------------
+
 #include "pch.h"
+#include <iostream>
+
+//------------------------------------------------------------------------
+//  Entry point.
+//------------------------------------------------------------------------
 
 BOOL APIENTRY DllMain( HMODULE hModule,
                        DWORD  ul_reason_for_call,
@@ -9,6 +26,7 @@ BOOL APIENTRY DllMain( HMODULE hModule,
     switch (ul_reason_for_call)
     {
     case DLL_PROCESS_ATTACH:
+      std::cout << "attached" << std::endl;
     case DLL_THREAD_ATTACH:
     case DLL_THREAD_DETACH:
     case DLL_PROCESS_DETACH:
