@@ -148,7 +148,7 @@ public:
 	 * \brief injection specific algorithm here
 	 * \return true in case of success
 	 */
-	virtual bool					doInjection() = 0;
+	virtual bool					doInjection();
 	
 	// Attributes
 public:

@@ -10,6 +10,8 @@ Simple example of usage ASM code in C/C++ project.
 
 ### tests: dx_app.exe, my_app.exe, my_dll.exe
 
+Simple applications to check injection
+
 ## Build
 
 ## Demo:
